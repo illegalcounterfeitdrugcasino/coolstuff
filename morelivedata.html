@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Device Monitor</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    canvas {
+      margin-top: 20px;
+      border: 1px solid #0f0;
+    }
+    #stats {
+      margin-top: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Device Monitor</h1>
+  <div id="stats">
+    <div id="battery">Battery: N/A</div>
+    <div id="latency">Network Latency: N/A</div>
+    <div id="cpu">CPU Load (approx): N/A</div>
+    <div id="mouse">Mouse Speed: 0 px/s</div>
+  </div>
+  <canvas id="graph" width="800" height="200"></canvas>
+
+  <script>
+    const batteryEl = document.getElementById('battery');
+    const latencyEl = document.getElementById('latency');
+    const cpuEl = document.getElementById('cpu');
+    const mouseEl = document.getElementById('mouse');
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    const graphHeight = canvas.height;
+    const graphWidth = canvas.width;
+    
+    let cpuSamples = [];
+    let pingSamples = [];
+    let lastMouseX = null;
+    let lastMouseY = null;
+    let lastMouseTime = null;
+    let mouseSpeed = 0;
+
+    // Graph update
+    function updateGraph(value, color = '#0f0') {
+      const imageData = ctx.getImageData(1, 0, graphWidth - 1, graphHeight);
+      ctx.clearRect(0, 0, graphWidth, graphHeight);
+      ctx.putImageData(imageData, 0, 0);
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      const y = graphHeight - (value / 100) * graphHeight;
+      ctx.moveTo(graphWidth - 2, graphHeight);
+      ctx.lineTo(graphWidth - 2, y);
+      ctx.stroke();
+    }
+
+    // Battery
+    navigator.getBattery?.().then(battery => {
+      function updateBattery() {
+        batteryEl.textContent = `Battery: ${(battery.level * 100).toFixed(0)}% ${battery.charging ? '(Charging)' : ''}`;
+      }
+      battery.addEventListener('levelchange', updateBattery);
+      battery.addEventListener('chargingchange', updateBattery);
+      updateBattery();
+    });
+
+    // Network latency (ping)
+    async function pingServer() {
+      const start = performance.now();
+      try {
+        await fetch("https://www.google.com/generate_204", { mode: 'no-cors', cache: 'no-store' });
+        const latency = performance.now() - start;
+        latencyEl.textContent = `Network Latency: ${latency.toFixed(1)} ms`;
+        pingSamples.push(latency);
+        if (pingSamples.length > 100) pingSamples.shift();
+      } catch {
+        latencyEl.textContent = 'Network Latency: Unreachable';
+      }
+      setTimeout(pingServer, 5000);
+    }
+    pingServer();
+
+    // CPU approximation via busy loop detection
+    let lastTime = performance.now();
+    function estimateCPU() {
+      const now = performance.now();
+      const diff = now - lastTime;
+      lastTime = now;
+      const load = Math.min(100, Math.max(0, (diff - 16.7) * 6)); // rough estimate
+      cpuEl.textContent = `CPU Load (approx): ${load.toFixed(1)}%`;
+      cpuSamples.push(load);
+      if (cpuSamples.length > 100) cpuSamples.shift();
+      updateGraph(load, '#0f0');
+      requestAnimationFrame(estimateCPU);
+    }
+    estimateCPU();
+
+    // Mouse movement speed
+    window.addEventListener('mousemove', e => {
+      const now = performance.now();
+      if (lastMouseX != null && lastMouseY != null) {
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        const dt = (now - lastMouseTime) / 1000;
+        const speed = Math.sqrt(dx * dx + dy * dy) / dt;
+        mouseSpeed = speed;
+        mouseEl.textContent = `Mouse Speed: ${speed.toFixed(1)} px/s`;
+      }
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      lastMouseTime = now;
+    });
+  </script>
+</body>
+</html>
