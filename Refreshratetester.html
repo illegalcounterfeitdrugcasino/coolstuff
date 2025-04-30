@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Refresh Rate Monitor</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      height: 100vh;
+    }
+    canvas {
+      border: 1px solid #0f0;
+      margin-top: 10px;
+    }
+    #rate {
+      font-size: 1.5em;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="rate">Refresh Rate: Calculating...</div>
+  <canvas id="graph" width="800" height="200"></canvas>
+  <script>
+    const rateDisplay = document.getElementById('rate');
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+
+    let timestamps = [];
+    const maxSamples = 100;
+    const graphWidth = canvas.width;
+    const graphHeight = canvas.height;
+
+    function updateGraph(rate) {
+      // Shift canvas left by 1px
+      const imageData = ctx.getImageData(1, 0, graphWidth - 1, graphHeight);
+      ctx.clearRect(0, 0, graphWidth, graphHeight);
+      ctx.putImageData(imageData, 0, 0);
+
+      // Draw new line
+      const y = graphHeight - (rate / 144) * graphHeight; // Scale assuming 144Hz max
+      ctx.strokeStyle = '#0f0';
+      ctx.beginPath();
+      ctx.moveTo(graphWidth - 2, graphHeight);
+      ctx.lineTo(graphWidth - 2, y);
+      ctx.stroke();
+    }
+
+    function measure() {
+      requestAnimationFrame((now) => {
+        timestamps.push(now);
+        if (timestamps.length > maxSamples) timestamps.shift();
+
+        if (timestamps.length >= 2) {
+          const diffs = [];
+          for (let i = 1; i < timestamps.length; i++) {
+            diffs.push(timestamps[i] - timestamps[i - 1]);
+          }
+          const avg = diffs.reduce((a, b) => a + b) / diffs.length;
+          const refreshRate = 1000 / avg;
+
+          rateDisplay.textContent = `Refresh Rate: ${refreshRate.toFixed(4)} Hz`;
+          updateGraph(refreshRate);
+        }
+
+        measure();
+      });
+    }
+
+    measure();
+  </script>
+</body>
+</html>
