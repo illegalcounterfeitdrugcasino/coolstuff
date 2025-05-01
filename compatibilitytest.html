@@ -1,148 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>FLGC Compatibility Inspector</title>
+  <meta charset="UTF-8">
+  <title>FLGC Compatibility Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      background: #000;
-      color: #0f0;
-      font-family: monospace;
-      padding: 30px;
-    }
-    h1 { font-size: 28px; color: #00ffff; }
-    pre {
-      background: #111;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      white-space: pre-wrap;
-      font-size: 14px;
-    }
-    .fail { color: red; }
-    .pass { color: lime; }
-    .warn { color: yellow; }
+    body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+    h1 { color: #0ff; }
+    .fail { color: #f33; }
+    .warn { color: #ff0; }
+    .pass { color: #0f0; }
+    pre { background: #111; padding: 20px; border-radius: 10px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <h1>FLGC Compatibility Inspector</h1>
-  <p>This tool checks every critical feature needed by FLGC and explains why a device might be incompatible.</p>
-  <pre id="output">Running checks...</pre>
+  <h1>FLGC Runtime Compatibility Test</h1>
+  <p>Running actual feature and Firebase tests...</p>
+  <pre id="output">Starting tests...</pre>
+
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 
   <script>
-    async function runDiagnostics() {
-      const log = [];
-      const failedReasons = [];
+    const output = document.getElementById("output");
+    const results = [];
+    let isCompatible = true;
 
-      const out = document.getElementById('output');
-      const ua = navigator.userAgent;
+    const log = (label, pass, detail = "") => {
+      const status = pass ? "✅" : "❌";
+      const colorClass = pass ? "pass" : "fail";
+      results.push(`${status} ${label}${detail ? " – " + detail : ""}`);
+      if (!pass) isCompatible = false;
+    };
 
-      const isIOS = /iP(hone|od|ad)/.test(ua);
-      const iosVersion = (() => {
-        const match = ua.match(/OS (\d+)_?(\d+)?/);
-        return match ? `${match[1]}.${match[2] || 0}` : "Unknown";
-      })();
-
-      const isCriOS = /CriOS\/([0-9.]+)/.exec(ua);
-      const criosVersion = isCriOS ? isCriOS[1] : "N/A";
-
-      const safariVersion = (() => {
-        const match = ua.match(/Version\/([0-9.]+).*Safari/);
-        return match ? match[1] : "Unknown";
-      })();
-
-      log.push(`User-Agent: ${ua}`);
-      log.push(`iOS Version: ${iosVersion}`);
-      log.push(`Safari Version: ${safariVersion}`);
-      log.push(`Chrome (CriOS) Version: ${criosVersion}`);
-
-      // 1. Module support
-      let moduleSupport = false;
+    async function runTests() {
+      // 1. Test ES Module Support
       try {
         new Function('import("")');
-        moduleSupport = true;
-        log.push(`✅ ES Modules: Supported`);
-      } catch (e) {
-        log.push(`❌ ES Modules: Not supported`);
-        failedReasons.push("Missing ES module support");
-      }
-
-      // 2. Async/await
-      let asyncSupported = true;
-      try {
-        new Function("async () => {}")();
-        log.push(`✅ Async/Await: Supported`);
+        log("ES Modules (import())", true);
       } catch {
-        asyncSupported = false;
-        log.push(`❌ Async/Await: Not supported`);
-        failedReasons.push("Missing async/await support");
+        log("ES Modules (import())", false, "Missing support for import()");
       }
 
-      // 3. WebGL
-      let webglRenderer = "Unavailable";
-      let webglOk = false;
+      // 2. Test async/await
       try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (gl) {
-          webglOk = true;
-          const dbg = gl.getExtension("WEBGL_debug_renderer_info");
-          webglRenderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "Available (no debug info)";
+        new Function("async function test() {}")();
+        log("Async/Await", true);
+      } catch {
+        log("Async/Await", false, "async function syntax not supported");
+      }
+
+      // 3. Test fetch()
+      try {
+        const res = await fetch("https://httpbin.org/get");
+        if (res.ok) {
+          log("fetch()", true);
+        } else {
+          log("fetch()", false, "Response not ok");
         }
-      } catch {}
-      log.push(`${webglOk ? "✅" : "❌"} WebGL: ${webglOk ? "Supported" : "Not available"}`);
-      log.push(`Renderer: ${webglRenderer}`);
-      if (!webglOk) failedReasons.push("WebGL not supported");
-
-      // 4. Firebase-related APIs
-      if (!window.fetch) {
-        log.push(`❌ fetch: Not supported`);
-        failedReasons.push("Missing fetch API");
-      } else {
-        log.push(`✅ fetch: Supported`);
+      } catch (e) {
+        log("fetch()", false, "fetch threw: " + e.message);
       }
 
-      if (!window.Promise) {
-        log.push(`❌ Promise: Not supported`);
-        failedReasons.push("Missing Promise support");
-      } else {
-        log.push(`✅ Promise: Supported`);
+      // 4. WebGL test
+      try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (gl) {
+          const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+          const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "Available";
+          log("WebGL", true, "Renderer: " + renderer);
+        } else {
+          throw new Error("WebGL context not available");
+        }
+      } catch (e) {
+        log("WebGL", false, e.message);
       }
 
-      if (!navigator.getBattery) {
-        log.push(`⚠️ Battery API: Not available`);
-      } else {
-        log.push(`✅ Battery API: Available`);
+      // 5. navigator.getBattery
+      try {
+        if (navigator.getBattery) {
+          const battery = await navigator.getBattery();
+          log("Battery API", true, `Level: ${(battery.level * 100).toFixed(0)}%`);
+        } else {
+          throw new Error("navigator.getBattery not supported");
+        }
+      } catch (e) {
+        log("Battery API", false, e.message);
       }
 
-      if (!navigator.connection) {
-        log.push(`⚠️ Connection API: Not available`);
-      } else {
-        log.push(`✅ Connection API: Available`);
+      // 6. Intl API
+      try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        log("Intl Timezone", !!tz, tz || "Unknown");
+      } catch (e) {
+        log("Intl API", false, e.message);
       }
 
-      // 5. Hardware
-      log.push(`CPU Cores: ${navigator.hardwareConcurrency || "Unknown"}`);
-      log.push(`Device Memory: ${navigator.deviceMemory || "Unknown"}`);
-      log.push(`Touch Support: ${('ontouchstart' in window || navigator.maxTouchPoints > 0) ? "Yes" : "No"}`);
-      log.push(`Screen: ${screen.width}x${screen.height} @${window.devicePixelRatio}x`);
-      log.push(`Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+      // 7. Firebase Init and Firestore Write
+      try {
+        const firebaseConfig = {
+          apiKey: "AIzaSyAR5ZNjlqMDSu6nTLEYrTQZrFhSODply8s",
+          authDomain: "flgcas.firebaseapp.com",
+          projectId: "flgcas",
+          storageBucket: "flgcas.firebasestorage.app",
+          messagingSenderId: "756441459947",
+          appId: "1:756441459947:web:82e6aaa245c5cea95ae2ae",
+          measurementId: "G-WT7712F2DP"
+        };
 
-      // Final verdict
-      log.push(`\n=== COMPATIBILITY RESULT ===`);
-      if (failedReasons.length === 0) {
-        log.push(`✅ This device appears to be fully compatible with FLGC.`);
-      } else {
-        log.push(`❌ This device is NOT compatible with FLGC.`);
-        log.push(`Reasons:`);
-        failedReasons.forEach(r => log.push(`- ${r}`));
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const docRef = await db.collection("compatibility-tests").add({
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          testDevice: true
+        });
+        log("Firebase Firestore Write", true, `Document ID: ${docRef.id}`);
+      } catch (e) {
+        log("Firebase Firestore Write", false, e.message);
       }
 
-      out.textContent = log.join('\n');
+      // 8. Device Info (not verdict-related)
+      results.push("");
+      results.push("=== Device Info ===");
+      results.push("User-Agent: " + navigator.userAgent);
+      results.push("Hardware Cores: " + (navigator.hardwareConcurrency || "N/A"));
+      results.push("Device Memory: " + (navigator.deviceMemory || "N/A"));
+      results.push("Touch Support: " + (('ontouchstart' in window || navigator.maxTouchPoints > 0) ? "Yes" : "No"));
+      results.push("Screen: " + screen.width + "x" + screen.height + " @ " + window.devicePixelRatio + "x");
+
+      results.push("");
+      results.push("=== FINAL VERDICT ===");
+      if (isCompatible) {
+        results.push("✅ This device is COMPATIBLE with FLGC.");
+      } else {
+        results.push("❌ This device is NOT compatible with FLGC.");
+        results.push("Please update to a newer OS/browser.");
+      }
+
+      output.textContent = results.join("\n");
     }
 
-    runDiagnostics();
+    runTests();
   </script>
 </body>
 </html>
