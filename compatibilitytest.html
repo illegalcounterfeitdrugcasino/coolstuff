@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FLGC Device Compatibility Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      padding: 30px;
+      line-height: 1.5;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+      color: #00ffff;
+    }
+    .status-good { color: #00ff00; }
+    .status-bad { color: #ff0000; }
+    .report {
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    .verdict {
+      font-size: 1.5em;
+      margin-top: 30px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>FLGC Device Compatibility Checker</h1>
+  <div id="report" class="report">Checking...</div>
+  <div id="verdict" class="verdict"></div>
+
+  <script>
+    async function runCheck() {
+      const results = [];
+
+      // Module support (this file assumes yes)
+      results.push({ name: "ES6 Module Support", value: true });
+
+      // WebGL support
+      let webglSupported = false;
+      let webglRenderer = "Unknown";
+      try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        webglSupported = !!gl;
+        if (gl) {
+          const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+          if (dbg) {
+            webglRenderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL);
+          }
+        }
+      } catch {}
+      results.push({ name: "WebGL Support", value: webglSupported, extra: webglRenderer });
+
+      // Battery API
+      let batterySupported = typeof navigator.getBattery === "function";
+      results.push({ name: "Battery API", value: batterySupported });
+
+      // Connection API
+      let connectionSupported = !!navigator.connection;
+      results.push({ name: "Connection API", value: connectionSupported });
+
+      // deviceMemory and CPU cores
+      results.push({ name: "deviceMemory", value: navigator.deviceMemory || "N/A" });
+      results.push({ name: "CPU Cores", value: navigator.hardwareConcurrency || "N/A" });
+
+      // Touch support
+      const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      results.push({ name: "Touch Support", value: touch });
+
+      // Async/await & fetch support
+      const fetchSupported = typeof fetch === "function";
+      let asyncSupported = true;
+      try {
+        new Function("async () => {}")();
+      } catch {
+        asyncSupported = false;
+      }
+      results.push({ name: "Fetch Support", value: fetchSupported });
+      results.push({ name: "Async/Await Support", value: asyncSupported });
+
+      // Intl API
+      let timezone = "Unknown";
+      try {
+        timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      } catch {}
+      results.push({ name: "Timezone Support", value: timezone !== "Unknown", extra: timezone });
+
+      // Screen
+      const res = `${screen.width}x${screen.height}`;
+      const pixelRatio = window.devicePixelRatio || 1;
+      results.push({ name: "Screen Resolution", value: res + ` @${pixelRatio}x` });
+
+      // Refresh rate estimate
+      let refreshRate = "Unknown";
+      try {
+        const samples = [];
+        let last = performance.now();
+        for (let i = 0; i < 100; i++) {
+          await new Promise(requestAnimationFrame);
+          const now = performance.now();
+          samples.push(now - last);
+          last = now;
+        }
+        const avg = samples.reduce((a, b) => a + b, 0) / samples.length;
+        refreshRate = (1000 / avg).toFixed(2) + " Hz";
+      } catch {}
+      results.push({ name: "Refresh Rate (est)", value: refreshRate });
+
+      // Compatibility verdict
+      const isCompatible = results.every(r =>
+        typeof r.value === "boolean" ? r.value : true
+      );
+
+      const reportText = results.map(r => {
+        const status = typeof r.value === "boolean"
+          ? (r.value ? "✅" : "❌")
+          : "📊";
+        return `${status} ${r.name}: ${r.value}${r.extra ? ` (${r.extra})` : ""}`;
+      }).join("\n");
+
+      document.getElementById("report").textContent = reportText;
+      document.getElementById("verdict").innerHTML =
+        isCompatible
+          ? `<span class="status-good">✅ This device is compatible with FLGC</span>`
+          : `<span class="status-bad">❌ This device is NOT compatible with FLGC</span>`;
+    }
+
+    runCheck();
+  </script>
+</body>
+</html>
