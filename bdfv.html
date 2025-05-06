@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Fingerprint Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .section {
+      background: #fff;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 800px;
+    }
+    pre {
+      background: #efefef;
+      padding: 10px;
+      overflow-x: auto;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Browser & Device Fingerprint Viewer</h1>
+
+  <div id="output"></div>
+
+  <script>
+    async function collectInfo() {
+      const output = document.getElementById('output');
+
+      function addSection(title, data) {
+        const section = document.createElement('div');
+        section.className = 'section';
+        section.innerHTML = `<h2>${title}</h2><pre>${data}</pre>`;
+        output.appendChild(section);
+      }
+
+      // General Browser Info
+      const generalInfo = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        vendor: navigator.vendor,
+        appCodeName: navigator.appCodeName,
+        appName: navigator.appName,
+        appVersion: navigator.appVersion,
+        product: navigator.product,
+        productSub: navigator.productSub,
+        doNotTrack: navigator.doNotTrack
+      };
+      addSection('General Browser Info', JSON.stringify(generalInfo, null, 2));
+
+      // Performance & Load Times
+      const perf = performance.getEntriesByType('navigation')[0] || performance.timing;
+      const perfInfo = {
+        type: perf.type || 'unknown',
+        redirectTime: perf.redirectEnd - perf.redirectStart,
+        dnsLookupTime: perf.domainLookupEnd - perf.domainLookupStart,
+        tcpHandshakeTime: perf.connectEnd - perf.connectStart,
+        responseTime: perf.responseEnd - perf.requestStart,
+        domInteractive: perf.domInteractive,
+        domContentLoaded: perf.domContentLoadedEventEnd,
+        pageLoad: perf.loadEventEnd,
+      };
+      addSection('Performance & Load Times', JSON.stringify(perfInfo, null, 2));
+
+      // Languages & Timezone
+      const langInfo = {
+        language: navigator.language,
+        languages: navigator.languages,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timezoneOffset: new Date().getTimezoneOffset()
+      };
+      addSection('Languages & Timezone', JSON.stringify(langInfo, null, 2));
+
+      // Screen & Display
+      const screenInfo = {
+        width: screen.width,
+        height: screen.height,
+        availWidth: screen.availWidth,
+        availHeight: screen.availHeight,
+        colorDepth: screen.colorDepth,
+        pixelDepth: screen.pixelDepth,
+        devicePixelRatio: window.devicePixelRatio,
+        refreshRate: await getRefreshRate(),
+        physicalResolution: `${screen.width * window.devicePixelRatio} x ${screen.height * window.devicePixelRatio}`
+      };
+      addSection('Screen & Display', JSON.stringify(screenInfo, null, 2));
+
+      // Hardware & Device
+      const hardwareInfo = {
+        hardwareConcurrency: navigator.hardwareConcurrency,
+        deviceMemory: navigator.deviceMemory,
+        touchSupport: 'ontouchstart' in window,
+        maxTouchPoints: navigator.maxTouchPoints,
+        clipboardSupported: !!navigator.clipboard,
+        cookieEnabled: navigator.cookieEnabled,
+        javaEnabled: navigator.javaEnabled ? navigator.javaEnabled() : false,
+        battery: await getBatteryInfo(),
+        sensors: getSensorSupport()
+      };
+      addSection('Hardware & Device', JSON.stringify(hardwareInfo, null, 2));
+
+      // Network Info
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const networkInfo = {
+        type: connection ? connection.effectiveType : 'unknown',
+        downlink: connection ? connection.downlink : 'unknown',
+        rtt: connection ? connection.rtt : 'unknown'
+      };
+      addSection('Network Info', JSON.stringify(networkInfo, null, 2));
+
+      // WebGL & Canvas
+      const webglInfo = getWebGLInfo();
+      const canvasFingerprint = getCanvasFingerprint();
+      addSection('WebGL Info', JSON.stringify(webglInfo, null, 2));
+      addSection('Canvas Fingerprint', canvasFingerprint);
+
+      // Audio Fingerprint
+      const audioFingerprint = await getAudioFingerprint();
+      addSection('Audio Fingerprint', audioFingerprint);
+
+      // Permissions
+      const permissions = await getPermissions();
+      addSection('Permissions', JSON.stringify(permissions, null, 2));
+
+      // Storage & Features
+      const storage = {
+        localStorage: !!window.localStorage,
+        sessionStorage: !!window.sessionStorage,
+        indexedDB: !!window.indexedDB,
+        serviceWorker: 'serviceWorker' in navigator,
+        plugins: Array.from(navigator.plugins, p => p.name)
+      };
+      addSection('Storage & Features', JSON.stringify(storage, null, 2));
+    }
+
+    function getWebGLInfo() {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return 'WebGL not supported';
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      return {
+        vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'unknown',
+        renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'unknown'
+      };
+    }
+
+    function getCanvasFingerprint() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.textBaseline = 'top';
+      ctx.font = '14px Arial';
+      ctx.fillText('Fingerprint test 😃', 2, 2);
+      return canvas.toDataURL();
+    }
+
+    async function getBatteryInfo() {
+      if (navigator.getBattery) {
+        const battery = await navigator.getBattery();
+        return {
+          charging: battery.charging,
+          level: battery.level,
+          chargingTime: battery.chargingTime,
+          dischargingTime: battery.dischargingTime
+        };
+      }
+      return 'Battery API not supported';
+    }
+
+    function getSensorSupport() {
+      return {
+        accelerometer: 'Accelerometer' in window,
+        gyroscope: 'Gyroscope' in window,
+        magnetometer: 'Magnetometer' in window,
+        ambientLight: 'AmbientLightSensor' in window
+      };
+    }
+
+    async function getAudioFingerprint() {
+      try {
+        const audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
+        const osc = audioCtx.createOscillator();
+        const comp = audioCtx.createDynamicsCompressor();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(10000, audioCtx.currentTime);
+        osc.connect(comp);
+        comp.connect(audioCtx.destination);
+        osc.start(0);
+        const buffer = await audioCtx.startRendering();
+        let hash = 0;
+        buffer.getChannelData(0).forEach(val => {
+          hash += Math.abs(val);
+        });
+        return 'Audio fingerprint: ' + hash;
+      } catch (e) {
+        return 'Audio fingerprinting failed';
+      }
+    }
+
+    async function getPermissions() {
+      if (!navigator.permissions) return 'Permissions API not supported';
+      const perms = ['geolocation', 'notifications', 'push', 'camera', 'microphone', 'clipboard-read', 'clipboard-write'];
+      const results = {};
+      for (let perm of perms) {
+        try {
+          const status = await navigator.permissions.query({ name: perm });
+          results[perm] = status.state;
+        } catch (e) {
+          results[perm] = 'not available';
+        }
+      }
+      return results;
+    }
+
+    async function getRefreshRate() {
+      return new Promise(resolve => {
+        let frameCount = 0;
+        let start = performance.now();
+        function check() {
+          frameCount++;
+          const elapsed = performance.now() - start;
+          if (elapsed < 500) {
+            requestAnimationFrame(check);
+          } else {
+            const fps = (frameCount / elapsed) * 1000;
+            resolve(fps.toFixed(2) + ' Hz');
+          }
+        }
+        check();
+      });
+    }
+
+    collectInfo();
+  </script>
+</body>
+</html>
