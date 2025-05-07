@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Camera App</title>
+  <style>
+    video, canvas {
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #controls {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Advanced Camera App</h1>
+
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <div id="controls">
+    <button id="startRecording">Start Recording</button>
+    <button id="stopRecording" disabled>Stop Recording</button>
+    <button id="takePhoto">Take Photo</button>
+  </div>
+
+  <h2>Recorded Video</h2>
+  <video id="recordedVideo" controls></video>
+  <a id="downloadVideo" style="display:none;" download="recording.webm">Download Video</a>
+
+  <h2>Screenshot</h2>
+  <img id="photo" alt="Screenshot will appear here" style="max-width:600px; border:2px solid #333;">
+  <a id="downloadPhoto" style="display:none;" download="screenshot.png">Download Screenshot</a>
+
+  <p id="errorMsg" style="color:red;"></p>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photo = document.getElementById('photo');
+    const recordedVideo = document.getElementById('recordedVideo');
+    const errorMsg = document.getElementById('errorMsg');
+
+    const startBtn = document.getElementById('startRecording');
+    const stopBtn = document.getElementById('stopRecording');
+    const photoBtn = document.getElementById('takePhoto');
+    const downloadVideo = document.getElementById('downloadVideo');
+    const downloadPhoto = document.getElementById('downloadPhoto');
+
+    let mediaStream;
+    let mediaRecorder;
+    let recordedChunks = [];
+
+    async function startCamera() {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        video.srcObject = mediaStream;
+      } catch (err) {
+        errorMsg.textContent = `Error accessing media devices: ${err.message}`;
+      }
+    }
+
+    function startRecording() {
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(mediaStream);
+      mediaRecorder.ondataavailable = event => {
+        if (event.data.size > 0) recordedChunks.push(event.data);
+      };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        recordedVideo.src = url;
+        downloadVideo.href = url;
+        downloadVideo.style.display = 'inline';
+      };
+      mediaRecorder.start();
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    }
+
+    function stopRecording() {
+      mediaRecorder.stop();
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+    function takeScreenshot() {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL('image/png');
+      photo.src = imageData;
+      downloadPhoto.href = imageData;
+      downloadPhoto.style.display = 'inline';
+    }
+
+    startBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', stopRecording);
+    photoBtn.addEventListener('click', takeScreenshot);
+
+    window.addEventListener('load', startCamera);
+  </script>
+</body>
+</html>
