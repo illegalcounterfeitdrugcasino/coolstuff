@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Mic Visualizer</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 0.5em;
+    }
+    #status {
+      margin-bottom: 1em;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 150px;
+      background: #222;
+    }
+    #volume {
+      font-size: 1.2em;
+      margin: 0.5em 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Microphone Visualizer</h1>
+  <div id="status">Requesting microphone access...</div>
+  <div id="volume">Volume: N/A</div>
+  <canvas id="waveform"></canvas>
+  <canvas id="spectrum"></canvas>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const volumeEl = document.getElementById('volume');
+    const waveformCanvas = document.getElementById('waveform');
+    const spectrumCanvas = document.getElementById('spectrum');
+    const waveCtx = waveformCanvas.getContext('2d');
+    const specCtx = spectrumCanvas.getContext('2d');
+
+    waveformCanvas.width = spectrumCanvas.width = window.innerWidth;
+    waveformCanvas.height = spectrumCanvas.height = 150;
+
+    async function init() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        statusEl.textContent = "Microphone access granted.";
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+
+        source.connect(analyser);
+
+        const timeData = new Uint8Array(analyser.fftSize);
+        const freqData = new Uint8Array(analyser.frequencyBinCount);
+
+        function draw() {
+          requestAnimationFrame(draw);
+
+          analyser.getByteTimeDomainData(timeData);
+          analyser.getByteFrequencyData(freqData);
+
+          // --- Waveform ---
+          waveCtx.fillStyle = '#222';
+          waveCtx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+          waveCtx.lineWidth = 2;
+          waveCtx.strokeStyle = '#0f0';
+          waveCtx.beginPath();
+
+          const sliceWidth = waveformCanvas.width / timeData.length;
+          let x = 0;
+          for (let i = 0; i < timeData.length; i++) {
+            const v = timeData[i] / 128.0;
+            const y = v * waveformCanvas.height / 2;
+            if (i === 0) waveCtx.moveTo(x, y);
+            else waveCtx.lineTo(x, y);
+            x += sliceWidth;
+          }
+          waveCtx.lineTo(waveformCanvas.width, waveformCanvas.height / 2);
+          waveCtx.stroke();
+
+          // --- Frequency Spectrum ---
+          specCtx.fillStyle = '#222';
+          specCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+          const barWidth = (spectrumCanvas.width / freqData.length) * 2.5;
+          let barX = 0;
+          for (let i = 0; i < freqData.length; i++) {
+            const barHeight = freqData[i];
+            specCtx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+            specCtx.fillRect(barX, spectrumCanvas.height - barHeight, barWidth, barHeight);
+            barX += barWidth + 1;
+          }
+
+          // --- Volume Approximation ---
+          const avg = timeData.reduce((sum, v) => sum + Math.abs(v - 128), 0) / timeData.length;
+          const volume = (avg / 128 * 100).toFixed(2);
+          volumeEl.textContent = `Volume: ${volume}%`;
+        }
+
+        draw();
+      } catch (err) {
+        statusEl.textContent = 'Error accessing microphone: ' + err.message;
+        console.error(err);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
