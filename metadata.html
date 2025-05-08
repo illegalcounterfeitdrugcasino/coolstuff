@@ -2,46 +2,59 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Detect Device from Photo Metadata</title>
+  <title>Device Metadata Detector</title>
   <style>
-    body { font-family: sans-serif; padding: 1rem; }
-    #metadata { white-space: pre-wrap; background: #f0f0f0; padding: 1rem; border: 1px solid #ccc; margin-top: 1rem; }
+    body { font-family: sans-serif; padding: 1rem; max-width: 600px; margin: auto; }
+    #metadata { white-space: pre-wrap; background: #f9f9f9; padding: 1rem; border: 1px solid #ccc; margin-top: 1rem; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; }
   </style>
 </head>
 <body>
-  <h2>Device Model Detection via Photo</h2>
-  <p>Select or take a photo (preferably from your camera) to detect your device's make and model.</p>
+  <h2>Detect Device from Photo Metadata</h2>
+  <p>Select or take a photo below, then click "Check Metadata" to extract EXIF information.</p>
 
   <input type="file" id="photoInput" accept="image/*" capture="environment">
-  
+  <br>
+  <button id="checkBtn" disabled>Check Metadata</button>
+
   <h3>Detected Info</h3>
-  <div id="info">No image loaded.</div>
-  
+  <div id="info">No photo analyzed yet.</div>
+
   <h3>Full Metadata</h3>
   <div id="metadata">(none)</div>
 
   <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
   <script>
+    let selectedFile = null;
     const input = document.getElementById('photoInput');
+    const checkBtn = document.getElementById('checkBtn');
     const infoDiv = document.getElementById('info');
     const metadataDiv = document.getElementById('metadata');
 
-    input.addEventListener('change', function() {
-      const file = input.files[0];
-      if (!file) return;
+    input.addEventListener('change', () => {
+      selectedFile = input.files[0];
+      if (selectedFile) {
+        checkBtn.disabled = false;
+        infoDiv.textContent = 'Photo loaded. Click "Check Metadata" to analyze.';
+        metadataDiv.textContent = '(waiting...)';
+      } else {
+        checkBtn.disabled = true;
+        infoDiv.textContent = 'No photo selected.';
+        metadataDiv.textContent = '(none)';
+      }
+    });
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const arrayBuffer = e.target.result;
-        EXIF.getData({ src: file }, function() {
-          const allMeta = EXIF.getAllTags(this);
-          const model = EXIF.getTag(this, 'Model') || 'Unknown';
-          const make = EXIF.getTag(this, 'Make') || 'Unknown';
-          infoDiv.textContent = `Make: ${make}\nModel: ${model}`;
-          metadataDiv.textContent = JSON.stringify(allMeta, null, 2);
-        });
-      };
-      reader.readAsArrayBuffer(file);
+    checkBtn.addEventListener('click', () => {
+      if (!selectedFile) return;
+
+      EXIF.getData(selectedFile, function() {
+        const make = EXIF.getTag(this, 'Make') || 'Unknown';
+        const model = EXIF.getTag(this, 'Model') || 'Unknown';
+        const allMeta = EXIF.getAllTags(this);
+
+        infoDiv.textContent = `Make: ${make}\nModel: ${model}`;
+        metadataDiv.textContent = JSON.stringify(allMeta, null, 2);
+      });
     });
   </script>
 </body>
