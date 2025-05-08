@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Apple Device Permission Viewer</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    button { margin: 10px 0; padding: 10px 15px; font-size: 16px; }
+    pre { background: #fff; padding: 10px; border: 1px solid #ccc; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h2>Apple Device Permissions Dashboard</h2>
+  <button onclick="getPermissions()">Check Permissions</button>
+  <div id="output"></div>
+
+  <script>
+    async function getPermissions() {
+      const output = document.getElementById('output');
+      output.innerHTML = '<p>Requesting permissions...</p>';
+
+      const results = {};
+
+      // 1. Geolocation
+      try {
+        await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            pos => {
+              results.geolocation = pos.coords;
+              resolve();
+            },
+            err => {
+              results.geolocation = { error: err.message };
+              resolve();
+            }
+          );
+        });
+      } catch (e) {
+        results.geolocation = { error: e.message };
+      }
+
+      // 2. Notifications
+      try {
+        const permission = await Notification.requestPermission();
+        results.notifications = { permission };
+      } catch (e) {
+        results.notifications = { error: e.message };
+      }
+
+      // 3. Camera & Microphone
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        results.mediaDevices = {
+          video: stream.getVideoTracks().length,
+          audio: stream.getAudioTracks().length
+        };
+        stream.getTracks().forEach(track => track.stop());
+      } catch (e) {
+        results.mediaDevices = { error: e.message };
+      }
+
+      // 4. Device Orientation
+      try {
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+          const permission = await DeviceOrientationEvent.requestPermission();
+          results.deviceOrientationPermission = permission;
+        } else {
+          results.deviceOrientationPermission = 'Not required or not supported';
+        }
+      } catch (e) {
+        results.deviceOrientationPermission = { error: e.message };
+      }
+
+      // 5. Device Motion Test
+      window.addEventListener('devicemotion', event => {
+        results.deviceMotionData = {
+          acceleration: event.acceleration,
+          accelerationIncludingGravity: event.accelerationIncludingGravity,
+          rotationRate: event.rotationRate
+        };
+      }, { once: true });
+
+      // Wait briefly to capture motion event
+      setTimeout(() => {
+        output.innerHTML = `<pre>${JSON.stringify(results, null, 2)}</pre>`;
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
