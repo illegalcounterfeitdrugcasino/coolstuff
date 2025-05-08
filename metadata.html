@@ -2,81 +2,47 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Camera Device Metadata</title>
+  <title>Detect Device from Photo Metadata</title>
   <style>
     body { font-family: sans-serif; padding: 1rem; }
-    #video, #canvas { display: none; }
     #metadata { white-space: pre-wrap; background: #f0f0f0; padding: 1rem; border: 1px solid #ccc; margin-top: 1rem; }
   </style>
 </head>
 <body>
-  <h2>Camera Device Model Detector</h2>
-  <p>This tool requests camera access, then tries to detect your device model from the photo metadata.</p>
-  
-  <button id="requestCamera">Request Camera Access</button>
-  <button id="detectModel" disabled>Detect Device Model</button>
-  
-  <video id="video" autoplay playsinline></video>
-  <canvas id="canvas"></canvas>
+  <h2>Device Model Detection via Photo</h2>
+  <p>Select or take a photo (preferably from your camera) to detect your device's make and model.</p>
+
+  <input type="file" id="photoInput" accept="image/*" capture="environment">
   
   <h3>Detected Info</h3>
-  <div id="info">Not detected yet.</div>
+  <div id="info">No image loaded.</div>
   
-  <h3>Raw Metadata</h3>
+  <h3>Full Metadata</h3>
   <div id="metadata">(none)</div>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
   <script>
-    const requestBtn = document.getElementById('requestCamera');
-    const detectBtn = document.getElementById('detectModel');
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
+    const input = document.getElementById('photoInput');
     const infoDiv = document.getElementById('info');
     const metadataDiv = document.getElementById('metadata');
-    let stream = null;
 
-    requestBtn.onclick = async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        detectBtn.disabled = false;
-        requestBtn.textContent = 'Camera Access Granted';
-        requestBtn.disabled = true;
-      } catch (err) {
-        alert('Camera access denied or not available.');
-      }
-    };
+    input.addEventListener('change', function() {
+      const file = input.files[0];
+      if (!file) return;
 
-    detectBtn.onclick = async () => {
-      // Draw a frame from video to canvas
-      const width = video.videoWidth;
-      const height = video.videoHeight;
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, width, height);
-
-      // Convert canvas to blob
-      canvas.toBlob(blob => {
-        const reader = new FileReader();
-        reader.onload = function() {
-          const arrayBuffer = reader.result;
-          const dataView = new DataView(arrayBuffer);
-          EXIF.getData({ buffer: arrayBuffer }, function() {
-            let model = EXIF.getTag(this, 'Model');
-            let make = EXIF.getTag(this, 'Make');
-            let allMeta = EXIF.getAllTags(this);
-            if (model || make) {
-              infoDiv.textContent = `Make: ${make || 'Unknown'}\nModel: ${model || 'Unknown'}`;
-            } else {
-              infoDiv.textContent = 'No EXIF device info found.';
-            }
-            metadataDiv.textContent = JSON.stringify(allMeta, null, 2);
-          });
-        };
-        reader.readAsArrayBuffer(blob);
-      }, 'image/jpeg');
-    };
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const arrayBuffer = e.target.result;
+        EXIF.getData({ src: file }, function() {
+          const allMeta = EXIF.getAllTags(this);
+          const model = EXIF.getTag(this, 'Model') || 'Unknown';
+          const make = EXIF.getTag(this, 'Make') || 'Unknown';
+          infoDiv.textContent = `Make: ${make}\nModel: ${model}`;
+          metadataDiv.textContent = JSON.stringify(allMeta, null, 2);
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
   </script>
 </body>
 </html>
