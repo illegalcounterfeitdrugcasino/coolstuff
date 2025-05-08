@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Bot Detection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #main {
+      flex: 1;
+      padding: 20px;
+    }
+    #score {
+      width: 200px;
+      background: #111;
+      color: #0f0;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      position: relative;
+    }
+    .task {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 5px;
+    }
+    .task input, .task button {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="main">
+    <h1>Prove You're Human</h1>
+    <p>Complete the tasks and interact naturally.</p>
+
+    <div class="task" id="typingTask">
+      <label>Type this sentence quickly and accurately:</label><br>
+      <strong id="sentence">The quick brown fox jumps over the lazy dog</strong><br>
+      <input type="text" id="typingInput">
+    </div>
+
+    <div class="task" id="clickTask">
+      <label>Click the button as fast as you can when it appears:</label><br>
+      <button id="clickButton" style="display:none;">Click me fast!</button>
+    </div>
+
+    <div class="task" id="audioTask">
+      <label>Allow microphone access:</label><br>
+      <button onclick="requestMic()">Request Microphone Access</button>
+    </div>
+
+    <div class="task" id="cameraTask">
+      <label>Allow camera access:</label><br>
+      <button onclick="requestCamera()">Request Camera Access</button>
+    </div>
+  </div>
+  <div id="score">
+    Human Score:<br>
+    <span id="scoreValue">50</span>/100
+  </div>
+
+  <script>
+    let score = 50;
+    let variables = {
+      ua: 5,
+      typing: 10,
+      clickSpeed: 10,
+      mouseMove: 10,
+      micPermission: 10,
+      camPermission: 10,
+      focusEvents: 5,
+      fingerprintEntropy: 10
+    };
+
+    function updateScore(change, key) {
+      score += change;
+      score = Math.max(0, Math.min(100, score));
+      document.getElementById('scoreValue').textContent = score;
+
+      if (key && variables[key] !== undefined) {
+        variables[key] = Math.max(0, variables[key] + change);
+      }
+    }
+
+    // 1. User Agent check
+    const ua = navigator.userAgent;
+    if (/HeadlessChrome|PhantomJS/.test(ua)) updateScore(-20, 'ua');
+    else updateScore(5, 'ua');
+
+    // 2. Mouse movement
+    let lastMove = Date.now();
+    document.addEventListener('mousemove', () => {
+      let now = Date.now();
+      if (now - lastMove > 500) updateScore(1, 'mouseMove');
+      lastMove = now;
+    });
+
+    // 3. Typing dynamics
+    const typingInput = document.getElementById('typingInput');
+    const sentence = document.getElementById('sentence').textContent;
+    let startTyping = null;
+
+    typingInput.addEventListener('input', () => {
+      if (!startTyping) startTyping = Date.now();
+    });
+
+    typingInput.addEventListener('blur', () => {
+      if (typingInput.value === sentence) {
+        const elapsed = Date.now() - startTyping;
+        if (elapsed < 5000) updateScore(10, 'typing');
+        else updateScore(5, 'typing');
+      } else {
+        updateScore(-10, 'typing');
+      }
+    });
+
+    // 4. Click reaction task
+    const clickButton = document.getElementById('clickButton');
+    setTimeout(() => {
+      const appearTime = Date.now();
+      clickButton.style.display = 'inline-block';
+      clickButton.onclick = () => {
+        const reactTime = Date.now() - appearTime;
+        if (reactTime < 500) updateScore(10, 'clickSpeed');
+        else if (reactTime < 1000) updateScore(5, 'clickSpeed');
+        else updateScore(-5, 'clickSpeed');
+        clickButton.disabled = true;
+      };
+    }, Math.random() * 5000 + 2000);
+
+    // 5. Mic access
+    function requestMic() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(() => updateScore(10, 'micPermission'))
+        .catch(() => updateScore(-10, 'micPermission'));
+    }
+
+    // 6. Camera access
+    function requestCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(() => updateScore(10, 'camPermission'))
+        .catch(() => updateScore(-10, 'camPermission'));
+    }
+
+    // 7. Focus events (bots don't switch tabs)
+    window.addEventListener('focus', () => updateScore(1, 'focusEvents'));
+    window.addEventListener('blur', () => updateScore(-1, 'focusEvents'));
+
+    // 8. Entropy of fingerprint (based on screen, language, etc.)
+    const fingerprintEntropy = () => {
+      let entropy = 0;
+      entropy += screen.width * 0.01;
+      entropy += navigator.language.length;
+      entropy += navigator.hardwareConcurrency || 1;
+      if (navigator.plugins.length > 3) entropy += 5;
+      return entropy;
+    };
+    updateScore(fingerprintEntropy(), 'fingerprintEntropy');
+  </script>
+</body>
+</html>
