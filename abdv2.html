@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Bot Detection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background: #1e1e1e;
+      color: #fff;
+    }
+    #main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: scroll;
+    }
+    #score {
+      width: 220px;
+      background: #111;
+      color: #0f0;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      border-left: 2px solid #0f0;
+    }
+    .task {
+      margin: 20px 0;
+      background: #2c2c2c;
+      padding: 15px;
+      border-radius: 6px;
+    }
+    .task input, .task button {
+      margin-top: 10px;
+      padding: 8px;
+      font-size: 14px;
+    }
+    canvas {
+      background: #000;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="main">
+    <h1>Advanced Bot Detection System</h1>
+    <p>Your Human Score increases as you pass behavioral checks.</p>
+
+    <!-- Tasks -->
+    <div class="task">
+      <strong>Typing Challenge:</strong>
+      <p>Type the sentence below accurately and quickly.</p>
+      <div id="sentence">The quick brown fox jumps over the lazy dog</div>
+      <input type="text" id="typingInput">
+    </div>
+
+    <div class="task">
+      <strong>Click Reaction:</strong>
+      <p>Click the button as soon as it appears.</p>
+      <button id="clickTask" style="display:none;">Click Me!</button>
+    </div>
+
+    <div class="task">
+      <strong>Scroll Behavior:</strong>
+      <p>Scroll up and down on this page naturally.</p>
+    </div>
+
+    <div class="task">
+      <strong>Mouse Drawing:</strong>
+      <p>Draw freely inside the box to demonstrate mouse control.</p>
+      <canvas id="drawCanvas" width="400" height="200"></canvas>
+    </div>
+
+    <div class="task">
+      <strong>Camera/Microphone Access:</strong><br>
+      <button onclick="requestCamera()">Request Camera</button>
+      <button onclick="requestMic()">Request Mic</button>
+    </div>
+
+    <div class="task">
+      <strong>Mini Math Test:</strong>
+      <p>Solve: <span id="mathProblem"></span></p>
+      <input type="text" id="mathAnswer">
+      <button onclick="checkMath()">Submit</button>
+    </div>
+
+    <div class="task">
+      <strong>Hidden Trap:</strong>
+      <input type="text" id="trap" style="opacity:0; position:absolute; left:-9999px;">
+    </div>
+
+  </div>
+
+  <div id="score">
+    HUMAN SCORE:<br>
+    <span id="scoreValue">50</span>/100
+  </div>
+
+  <script>
+    let score = 50;
+    function updateScore(change) {
+      score += change;
+      score = Math.max(0, Math.min(100, score));
+      document.getElementById('scoreValue').textContent = score;
+    }
+
+    // 1. User Agent / Platform
+    const ua = navigator.userAgent;
+    const platform = navigator.platform;
+    if (/HeadlessChrome|PhantomJS/i.test(ua)) updateScore(-20);
+    if (platform.length < 3) updateScore(-5);
+
+    // 2. Plugins
+    if (navigator.plugins.length === 0) updateScore(-10);
+
+    // 3. Timezone
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (!tz) updateScore(-5);
+    } catch { updateScore(-5); }
+
+    // 4. Typing
+    const typingInput = document.getElementById('typingInput');
+    const sentence = document.getElementById('sentence').textContent;
+    let typingStart = null;
+
+    typingInput.addEventListener('input', () => {
+      if (!typingStart) typingStart = Date.now();
+    });
+
+    typingInput.addEventListener('blur', () => {
+      const elapsed = Date.now() - typingStart;
+      if (typingInput.value.trim() === sentence) {
+        if (elapsed < 6000) updateScore(10);
+        else updateScore(5);
+      } else {
+        updateScore(-5);
+      }
+    });
+
+    // 5. Click Reaction
+    const clickBtn = document.getElementById('clickTask');
+    setTimeout(() => {
+      const appear = Date.now();
+      clickBtn.style.display = "inline-block";
+      clickBtn.onclick = () => {
+        const time = Date.now() - appear;
+        if (time < 500) updateScore(10);
+        else if (time < 1000) updateScore(5);
+        else updateScore(-5);
+        clickBtn.disabled = true;
+      };
+    }, Math.random() * 5000 + 2000);
+
+    // 6. Scroll detection
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const now = Date.now();
+      if (now - lastScroll > 500) {
+        updateScore(1);
+        lastScroll = now;
+      }
+    });
+
+    // 7. Mouse movement
+    let mouseMoves = 0;
+    document.addEventListener('mousemove', () => {
+      mouseMoves++;
+      if (mouseMoves % 20 === 0) updateScore(1);
+    });
+
+    // 8. Drawing with mouse
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    canvas.addEventListener('mousedown', () => drawing = true);
+    canvas.addEventListener('mouseup', () => drawing = false);
+    canvas.addEventListener('mousemove', (e) => {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.fillStyle = '#0f0';
+      ctx.fillRect(x, y, 2, 2);
+    });
+
+    // 9. Camera & Microphone
+    function requestCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(() => updateScore(10))
+        .catch(() => updateScore(-10));
+    }
+    function requestMic() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(() => updateScore(10))
+        .catch(() => updateScore(-10));
+    }
+
+    // 10. Math test
+    let a = Math.floor(Math.random() * 10 + 1);
+    let b = Math.floor(Math.random() * 10 + 1);
+    document.getElementById('mathProblem').textContent = `${a} + ${b}`;
+    function checkMath() {
+      const ans = parseInt(document.getElementById('mathAnswer').value);
+      if (ans === a + b) updateScore(5);
+      else updateScore(-5);
+    }
+
+    // 11. Honeypot detection
+    const trap = document.getElementById('trap');
+    trap.addEventListener('input', () => updateScore(-20));
+
+    // 12. Focus/blur
+    window.addEventListener('focus', () => updateScore(1));
+    window.addEventListener('blur', () => updateScore(-1));
+
+    // 13. Copy/paste detection
+    document.addEventListener('paste', () => updateScore(-2));
+    document.addEventListener('copy', () => updateScore(-1));
+
+    // 14. WebGL check
+    try {
+      const gl = document.createElement('canvas').getContext('webgl');
+      if (!gl) updateScore(-5);
+      else updateScore(2);
+    } catch {
+      updateScore(-5);
+    }
+
+    // 15. Battery API
+    if (navigator.getBattery) {
+      navigator.getBattery().then(bat => {
+        if (bat.charging === true) updateScore(1);
+      });
+    }
+
+    // 16. Language
+    const lang = navigator.language || navigator.userLanguage;
+    if (!lang || lang.length < 2) updateScore(-3);
+
+    // 17. Device Memory
+    if ('deviceMemory' in navigator) {
+      if (navigator.deviceMemory < 1) updateScore(-5);
+      else updateScore(2);
+    }
+
+    // 18. Hardware Concurrency
+    if (navigator.hardwareConcurrency < 2) updateScore(-5);
+    else updateScore(2);
+
+    // 19. Iframe protection
+    if (window.top !== window.self) updateScore(-10);
+
+    // 20. Referrer
+    if (document.referrer.length === 0) updateScore(-1);
+
+    // 21. Touch support
+    if ('ontouchstart' in window) updateScore(2);
+
+    // 22. Resize events
+    window.addEventListener('resize', () => updateScore(1));
+
+    // 23. Permissions check
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: 'notifications' }).then(res => {
+        if (res.state === 'granted') updateScore(2);
+      });
+    }
+
+    // 24. WebRTC IP leakage trap
+    try {
+      const pc = new RTCPeerConnection({ iceServers: [] });
+      pc.createDataChannel('');
+      pc.createOffer().then(offer => {
+        if (offer.sdp.includes('candidate')) updateScore(1);
+        else updateScore(-5);
+      });
+    } catch { updateScore(-5); }
+
+    // 25. DevTools open detection (basic)
+    let devtoolsOpened = false;
+    setInterval(() => {
+      const widthThreshold = window.outerWidth - window.innerWidth > 100;
+      const heightThreshold = window.outerHeight - window.innerHeight > 100;
+      if (widthThreshold || heightThreshold) {
+        if (!devtoolsOpened) updateScore(-10);
+        devtoolsOpened = true;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
