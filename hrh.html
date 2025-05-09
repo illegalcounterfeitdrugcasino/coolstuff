@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HTTP Headers Viewer</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #0f0;
+      padding: 1em;
+      white-space: pre-wrap;
+    }
+    h1 { color: #8f8; }
+  </style>
+</head>
+<body>
+  <h1>HTTP Request Headers & Client Hints</h1>
+  <div id="output">Loading...</div>
+
+  <script>
+    async function getHeaders() {
+      const output = document.getElementById('output');
+      let text = '';
+
+      try {
+        // Fetch headers from a CORS-enabled proxy of deviceinfo.me
+        const res = await fetch('https://corsproxy.io/?https://www.deviceinfo.me');
+        const html = await res.text();
+
+        // Parse the <pre> block with header info
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const pre = doc.querySelector('pre');
+        text += pre ? pre.innerText.trim() : 'Could not extract headers.\n';
+      } catch (err) {
+        text += `Error fetching headers: ${err}\n`;
+      }
+
+      // Add navigator.userAgentData if available
+      if (navigator.userAgentData) {
+        text += '\nClient Hints (navigator.userAgentData):\n';
+        const data = navigator.userAgentData;
+        text += `  mobile: ${data.mobile}\n`;
+        text += `  platform: ${data.platform}\n`;
+        text += `  architecture: ${data.architecture || 'N/A'}\n`;
+        text += `  model: ${data.model || 'N/A'}\n`;
+        text += `  bitness: ${data.bitness || 'N/A'}\n`;
+
+        const brands = data.brands || data.uaList || [];
+        text += `  brands:\n`;
+        brands.forEach(b => {
+          text += `    ${b.brand}: ${b.version}\n`;
+        });
+
+        try {
+          const highEntropy = await data.getHighEntropyValues([
+            "architecture", "bitness", "model", "platformVersion", "uaFullVersion", "wow64"
+          ]);
+          Object.entries(highEntropy).forEach(([key, val]) => {
+            text += `  ${key}: ${val}\n`;
+          });
+        } catch (e) {
+          text += `  Error getting high-entropy hints: ${e}\n`;
+        }
+      } else {
+        text += '\nUser-Agent: ' + navigator.userAgent;
+      }
+
+      output.textContent = text;
+    }
+
+    getHeaders();
+  </script>
+</body>
+</html>
