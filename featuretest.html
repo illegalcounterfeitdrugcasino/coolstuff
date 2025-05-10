@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Feature Detection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #summary {
+      margin: 20px 0;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #3498db;
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .supported {
+      color: #27ae60;
+      font-weight: bold;
+    }
+    .not-supported {
+      color: #c0392b;
+      font-weight: bold;
+    }
+    .notes {
+      font-size: 0.9em;
+      color: #7f8c8d;
+    }
+    @media (max-width: 768px) {
+      table, th, td {
+        font-size: 0.9em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Browser Feature Detection</h1>
+  <div id="summary">Checking features...</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Feature Description</th>
+        <th>Supported</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="feature-table"></tbody>
+  </table>
+
+  <script>
+    // Feature detection functions
+    const featureTests = {
+      // HTML5 Features
+      'History API': () => !!window.history && !!window.history.pushState,
+      'HTML5 Audio Element': () => !!document.createElement('audio').canPlayType,
+      'HTML5 Video': () => !!document.createElement('video').canPlayType,
+      'Input Attribute autocomplete': () => 'autocomplete' in document.createElement('input'),
+      'Input Attribute autofocus': () => 'autofocus' in document.createElement('input'),
+      'Input Attribute list': () => 'list' in document.createElement('input'),
+      'Input Attribute max': () => 'max' in document.createElement('input'),
+      'Input Attribute min': () => 'min' in document.createElement('input'),
+      'Input Attribute multiple': () => 'multiple' in document.createElement('input'),
+      'Input Attribute pattern': () => 'pattern' in document.createElement('input'),
+      'Input Attribute placeholder': () => 'placeholder' in document.createElement('input'),
+      'Input Attribute required': () => 'required' in document.createElement('input'),
+      'Input Attribute step': () => 'step' in document.createElement('input'),
+      'Form Input Color (type=color)': () => document.createElement('input').type = 'color' && document.createElement('input').type === 'color',
+      'Form Input Date (type=date)': () => document.createElement('input').type = 'date' && document.createElement('input').type === 'date',
+      'Form Input Local Date and Time (type=datetime-local)': () => document.createElement('input').type = 'datetime-local' && document.createElement('input').type === 'datetime-local',
+      'Form Input Time (type=time)': () => document.createElement('input').type = 'time' && document.createElement('input').type === 'time',
+      'Form Input Week (type=week)': () => document.createElement('input').type = 'week' && document.createElement('input').type === 'week',
+      'Form Input Month (type=month)': () => document.createElement('input').type = 'month' && document.createElement('input').type === 'month',
+      'Form Input Number (type=number)': () => document.createElement('input').type = 'number' && document.createElement('input').type === 'number',
+      'Form Input Range (type=range)': () => document.createElement('input').type = 'range' && document.createElement('input').type === 'range',
+      'Form Input Search (type=search)': () => document.createElement('input').type = 'search' && document.createElement('input').type === 'search',
+      'Form Input E-mail (type=email)': () => document.createElement('input').type = 'email' && document.createElement('input').type === 'email',
+      'Form Input Telephone (type=tel)': () => document.createElement('input').type = 'tel' && document.createElement('input').type === 'tel',
+      'Form Input URL (type=url)': () => document.createElement('input').type = 'url' && document.createElement('input').type === 'url',
+      'postMessage': () => !!window.postMessage,
+      'Web Workers': () => !!window.Worker,
+      'Shared Web Workers': () => !!window.SharedWorker,
+      'DOM Element.classList': () => !!document.createElement('div').classList,
+      'dataset API': () => !!document.createElement('div').dataset,
+      'Document Fragment': () => !!document.createDocumentFragment,
+      '[hidden] Attribute': () => 'hidden' in document.createElement('div'),
+      'Intersection Observer API': () => !!window.IntersectionObserver,
+      'DOM4 MutationObserver': () => !!window.MutationObserver,
+      'Passive event listeners': () => {
+        let supportsPassive = false;
+        try {
+          const opts = Object.defineProperty({}, 'passive', { get: () => { supportsPassive = true; } });
+          window.addEventListener('test', null, opts);
+          window.removeEventListener('test', null, opts);
+        } catch (e) {}
+        return supportsPassive;
+      },
+      'Shadow DOM API': () => !!document.createElement('div').attachShadow,
+      'bdi Element': () => !!document.createElement('bdi').dir,
+      'details Element': () => 'open' in document.createElement('details'),
+      'output Element': () => 'value' in document.createElement('output'),
+      'picture Element': () => !!document.createElement('picture'),
+      'progress Element': () => 'value' in document.createElement('progress'),
+      'meter Element': () => 'value' in document.createElement('meter'),
+      'ruby, rp, rt Elements': () => !!document.createElement('ruby') && !!document.createElement('rp') && !!document.createElement('rt'),
+      'template Element': () => !!document.createElement('template').content,
+      'time Element': () => 'dateTime' in document.createElement('time'),
+      'track Element': () => 'kind' in document.createElement('track'),
+      'Text track API': () => !!window.TextTrack,
+      'textarea maxlength': () => 'maxLength' in document.createElement('textarea'),
+      'QuerySelector': () => !!document.querySelector && !!document.querySelectorAll,
+      'matchMedia': () => !!window.matchMedia,
+      'PushManager': () => !!window.PushManager,
+      'ResizeObserver': () => !!window.ResizeObserver,
+      'Web Animations API': () => !!document.createElement('div').animate,
+      'Vibration API': () => !!navigator.vibrate,
+
+      // CSS Features
+      'CSS all property': () => CSS.supports('all', 'initial'),
+      'CSS Animations': () => CSS.supports('animation-name', 'test'),
+      'CSS Appearance': () => CSS.supports('appearance', 'none'),
+      'CSS Backdrop Filter': () => CSS.supports('backdrop-filter', 'blur(5px)'),
+      'CSS Background Blend Mode': () => CSS.supports('background-blend-mode', 'multiply'),
+      'CSS Background Clip Text': () => CSS.supports('background-clip', 'text'),
+      'CSS background-position Shorthand': () => CSS.supports('background-position', 'top left'),
+      'CSS background-position-x/y': () => CSS.supports('background-position-x', 'left'),
+      'CSS background-repeat: round': () => CSS.supports('background-repeat', 'round'),
+      'CSS background-repeat: space': () => CSS.supports('background-repeat', 'space'),
+      'CSS background-size': () => CSS.supports('background-size', 'cover'),
+      'CSS border-image': () => CSS.supports('border-image', 'url()'),
+      'CSS border-radius': () => CSS.supports('border-radius', '5px'),
+      'CSS box-decoration-break': () => CSS.supports('box-decoration-break', 'clone'),
+      'CSS box-shadow': () => CSS.supports('box-shadow', '0 0 5px #000'),
+      'CSS box-sizing': () => CSS.supports('box-sizing', 'border-box'),
+      'CSS calc': () => CSS.supports('width', 'calc(100% - 10px)'),
+      'CSS :checked pseudo-selector': () => CSS.supports('selector(:checked)'),
+      'CSS Font ch Units': () => CSS.supports('width', '10ch'),
+      'CSS Columns': () => CSS.supports('columns', '2'),
+      'CSS Grid (new)': () => CSS.supports('display', 'grid'),
+      'CSS vw unit': () => CSS.supports('width', '10vw'),
+      'CSS aspect-ratio': () => CSS.supports('aspect-ratio', '16 / 9'),
+      'CSS Variables (Custom Properties)': () => CSS.supports('--test', 'red'),
+      'CSS display: table': () => CSS.supports('display', 'table'),
+      'CSS text-overflow ellipsis': () => CSS.supports('text-overflow', 'ellipsis'),
+      'CSS Filters': () => CSS.supports('filter', 'blur(5px)'),
+      '@font-face': () => {
+        const style = document.createElement('style');
+        style.textContent = '@font-face { font-family: test; src: url("data:font/woff;base64,"); }';
+        document.head.appendChild(style);
+        const fontFaceSupported = !!document.fonts;
+        document.head.removeChild(style);
+        return fontFaceSupported;
+      },
+      'Flexbox': () => CSS.supports('display', 'flex'),
+      'Flex Gap': () => CSS.supports('gap', '10px'),
+      'CSS :focus-within pseudo-selector': () => CSS.supports('selector(:focus-within)'),
+      'CSS font-display': () => CSS.supports('font-display', 'swap'),
+      'CSS Generated Content (:before/:after)': () => CSS.supports('content', '"test"'),
+      'CSS Gradients': () => CSS.supports('background', 'linear-gradient(to right, red, blue)'),
+      'CSS HSLA Colors': () => CSS.supports('color', 'hsla(0, 100%, 50%, 0.5)'),
+      'CSS RGBA Colors': () => CSS.supports('color', 'rgba(255, 0, 0, 0.5)'),
+      'CSS :invalid pseudo-class': () => CSS.supports('selector(:invalid)'),
+      'CSS :last-child pseudo-selector': () => CSS.supports('selector(:last-child)'),
+      'CSS Mask': () => CSS.supports('mask', 'url(#test)'),
+      'CSS Media Queries': () => CSS.supports('(max-width: 600px)'),
+      'CSS Hover Media Query': () => CSS.supports('(hover: hover)'),
+      'CSS Pointer Media Query': () => CSS.supports('(pointer: fine)'),
+      'CSS Multiple Backgrounds': () => CSS.supports('background', 'url(), url()'),
+      'CSS :nth-child pseudo-selector': () => CSS.supports('selector(:nth-child(2))'),
+      'CSS Object Fit': () => CSS.supports('object-fit', 'cover'),
+      'CSS opacity': () => CSS.supports('opacity', '0.5'),
+      'CSS Pointer Events': () => CSS.supports('pointer-events', 'none'),
+      'CSS position: sticky': () => CSS.supports('position', 'sticky'),
+      'CSS Reflections': () => CSS.supports('-webkit-box-reflect', 'below 0px'),
+      'CSS Font rem Units': () => CSS.supports('font-size', '1rem'),
+      'CSS resize': () => CSS.supports('resize', 'both'),
+      'CSS Styleable Scrollbars': () => CSS.supports('scrollbar-width', 'thin'),
+      'CSS Scroll Snap Points': () => CSS.supports('scroll-snap-type', 'x mandatory'),
+      'CSS Shapes': () => CSS.supports('shape-outside', 'circle()'),
+      'CSS @supports': () => !!window.CSS && !!CSS.supports,
+      'CSS :target pseudo-class': () => CSS.supports('selector(:target)'),
+      'CSS text-align-last': () => CSS.supports('text-align-last', 'center'),
+      'CSS text-decoration': () => CSS.supports('text-decoration', 'underline'),
+      'CSS text-shadow': () => CSS.supports('text-shadow', '0 0 5px #000'),
+      'CSS Transforms': () => CSS.supports('transform', 'translateX(10px)'),
+      'CSS Transforms 3D': () => CSS.supports('transform', 'perspective(500px)'),
+      'CSS Transitions': () => CSS.supports('transition', 'all 0.3s'),
+      'CSS user-select': () => CSS.supports('user-select', 'none'),
+      'CSS :valid pseudo-class': () => CSS.supports('selector(:valid)'),
+      'CSS font-variation-settings': () => CSS.supports('font-variation-settings', '"wght" 400'),
+      'CSS vh unit': () => CSS.supports('height', '10vh'),
+      'CSS vmax unit': () => CSS.supports('width', '10vmax'),
+      'CSS vmin unit': () => CSS.supports('width', '10vmin'),
+      'CSS will-change': () => CSS.supports('will-change', 'transform'),
+
+      // Graphics Features
+      'Canvas': () => !!document.createElement('canvas').getContext,
+      'Canvas Text': () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        return !!ctx && !!ctx.fillText;
+      },
+      'Canvas.toDataURL image/png': () => {
+        const canvas = document.createElement('canvas');
+        return !!canvas.toDataURL && canvas.toDataURL('image/png').startsWith('data:image/png');
+      },
+      'Canvas Blending Support': () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        return !!ctx && 'globalCompositeOperation' in ctx;
+      },
+      'SVG': () => !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect,
+
+      // Storage Features
+      'Cookie': () => !!navigator.cookieEnabled,
+      'Web Storage API localStorage': () => {
+        try {
+          return !!window.localStorage && localStorage.setItem('test', 'test') && localStorage.getItem('test') === 'test';
+        } catch (e) {
+          return false;
+        }
+      },
+      'Web Storage API sessionStorage': () => {
+        try {
+          return !!window.sessionStorage && sessionStorage.setItem('test', 'test') && sessionStorage.getItem('test') === 'test';
+        } catch (e) {
+          return false;
+        }
+      },
+      'IndexedDB': () => !!window.indexedDB,
+
+      // ECMAScript Features
+      'ES5': () => !!Object.defineProperty && !!Array.prototype.forEach,
+      'ES6 Arrow Functions': () => {
+        try {
+          eval('() => {}');
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      'ES6 Collections': () => !!window.Map && !!window.Set,
+      'ES6 Generators': () => {
+        try {
+          eval('function* test(){}');
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      'ES6 Promises': () => !!window.Promise,
+      'ES6 Rest parameters': () => {
+        try {
+          eval('function test(...args){}');
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      'ES6 Spread array': () => {
+        try {
+          eval('[...[1,2,3]]');
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      'ES6 Template Strings': () => {
+        try {
+          eval('`test ${1}`');
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      'ES6 String': () => !!String.prototype.includes && !!String.prototype.startsWith,
+      'ES7 Array': () => !!Array.prototype.includes,
+
+      // Network Features
+      'WebSockets': () => !!window.WebSocket,
+      'WebRTC Data Channel': () => !!window.RTCDataChannel,
+      'WebRTC Peer Connections': () => !!window.RTCPeerConnection,
+      'Fetch API': () => !!window.fetch,
+      'ServiceWorker API': () => !!navigator.serviceWorker,
+      'Server Sent Events': () => !!window.EventSource,
+
+      // Miscellaneous
+      'Geolocation API': () => !!navigator.geolocation,
+      'Battery API': () => !!navigator.getBattery,
+      'Blob Constructor': () => !!window.Blob,
+      'Content Editable': () => 'contentEditable' in document.createElement('div'),
+      'Cross-Origin Resource Sharing': () => {
+        const xhr = new XMLHttpRequest();
+        return 'withCredentials' in xhr;
+      },
+      'CustomEvent': () => !!window.CustomEvent,
+      'addEventListener': () => !!window.addEventListener,
+      'Device Motion Event': () => !!window.DeviceMotionEvent,
+      'Device Orientation Event': () => !!window.DeviceOrientationEvent,
+      'onInput Event': () => 'oninput' in document.createElement('input'),
+      'File API': () => !!window.File && !!window.FileReader,
+      'Fullscreen API': () => !!document.documentElement.requestFullscreen,
+      'GamePad API': () => !!navigator.getGamepads,
+      'iframe[srcdoc] Attribute': () => 'srcdoc' in document.createElement('iframe'),
+      'Native JSON Parsing': () => !!window.JSON && !!JSON.parse && !!JSON.stringify,
+      'Notifications API': () => !!window.Notification,
+      'Navigation Timing API': () => !!window.performance && !!performance.timing,
+      'Pointer Lock API': () => !!document.body.requestPointerLock,
+      'requestAnimationFrame': () => !!window.requestAnimationFrame,
+      'script async': () => 'async' in document.createElement('script'),
+      'Web Cryptography API': () => !!window.crypto && !!crypto.getRandomValues,
+      'Internationalization API': () => !!window.Intl && !!Intl.DateTimeFormat,
+      'Page Visibility API': () => 'visibilityState' in document,
+      'Custom Elements API': () => !!window.customElements,
+      'Media Source Extensions API': () => !!window.MediaSource,
+      'Channel Messaging API': () => !!window.MessageChannel,
+      'Proxy Object': () => !!window.Proxy,
+      'TextEncoder': () => !!window.TextEncoder,
+      'TextDecoder': () => !!window.TextDecoder,
+
+      // Additional Features
+      'WebGL': () => {
+        const canvas = document.createElement('canvas');
+        return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+      },
+      'WebGPU': () => !!navigator.gpu,
+      'Clipboard API': () => !!navigator.clipboard,
+      'MIDI Support': () => !!navigator.requestMIDIAccess,
+      'Performance Memory API': () => !!window.performance && !!performance.memory,
+      'Touch Events': () => 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+      'Do Not Track': () => 'doNotTrack' in navigator || 'doNotTrack' in window
+    };
+
+    // Feature categorization
+    const featureCategories = {
+      'HTML5 Features': [
+        'History API', 'HTML5 Audio Element', 'HTML5 Video', 'Input Attribute autocomplete', 'Input Attribute autofocus',
+        'Input Attribute list', 'Input Attribute max', 'Input Attribute min', 'Input Attribute multiple', 'Input Attribute pattern',
+        'Input Attribute placeholder', 'Input Attribute required', 'Input Attribute step', 'Form Input Color (type=color)',
+        'Form Input Date (type=date)', 'Form Input Local Date and Time (type=datetime-local)', 'Form Input Time (type=time)',
+        'Form Input Week (type=week)', 'Form Input Month (type=month)', 'Form Input Number (type=number)', 'Form Input Range (type=range)',
+        'Form Input Search (type=search)', 'Form Input E-mail (type=email)', 'Form Input Telephone (type=tel)', 'Form Input URL (type=url)',
+        'postMessage', 'Web Workers', 'Shared Web Workers', 'DOM Element.classList', 'dataset API', 'Document Fragment',
+        '[hidden] Attribute', 'Intersection Observer API', 'DOM4 MutationObserver', 'Passive event listeners', 'Shadow DOM API',
+        'bdi Element', 'details Element', 'output Element', 'picture Element', 'progress Element', 'meter Element', 'ruby, rp, rt Elements',
+        'template Element', 'time Element', 'track Element', 'Text track API', 'textarea maxlength', 'QuerySelector', 'matchMedia',
+        'PushManager', 'ResizeObserver', 'Web Animations API', 'Vibration API'
+      ],
+      'CSS Features': [
+        'CSS all property', 'CSS Animations', 'CSS Appearance', 'CSS Backdrop Filter', 'CSS Background Blend Mode',
+        'CSS Background Clip Text', 'CSS background-position Shorthand', 'CSS background-position-x/y', 'CSS background-repeat: round',
+        'CSS background-repeat: space', 'CSS background-size', 'CSS border-image', 'CSS border-radius', 'CSS box-decoration-break',
+        'CSS box-shadow', 'CSS box-sizing', 'CSS calc', 'CSS :checked pseudo-selector', 'CSS Font ch Units', 'CSS Columns',
+        'CSS Grid (new)', 'CSS vw unit', 'CSS aspect-ratio', 'CSS Variables (Custom Properties)', 'CSS display: table',
+        'CSS text-overflow ellipsis', 'CSS Filters', '@font-face', 'Flexbox', 'Flex Gap', 'CSS :focus-within pseudo-selector',
+        'CSS font-display', 'CSS Generated Content (:before/:after)', 'CSS Gradients', 'CSS HSLA Colors', 'CSS RGBA Colors',
+        'CSS :invalid pseudo-class', 'CSS :last-child pseudo-selector', 'CSS Mask', 'CSS Media Queries', 'CSS Hover Media Query',
+        'CSS Pointer Media Query', 'CSS Multiple Backgrounds', 'CSS :nth-child pseudo-selector', 'CSS Object Fit', 'CSS opacity',
+        'CSS Pointer Events', 'CSS position: sticky', 'CSS Reflections', 'CSS Font rem Units', 'CSS resize', 'CSS Styleable Scrollbars',
+        'CSS Scroll Snap Points', 'CSS Shapes', 'CSS @supports', 'CSS :target pseudo-class', 'CSS text-align-last', 'CSS text-decoration',
+        'CSS text-shadow', 'CSS Transforms', 'CSS Transforms 3D', 'CSS Transitions', 'CSS user-select', 'CSS :valid pseudo-class',
+        'CSS font-variation-settings', 'CSS vh unit', 'CSS vmax unit', 'CSS vmin unit', 'CSS will-change'
+      ],
+      'Graphics Features': [
+        'Canvas', 'Canvas Text', 'Canvas.toDataURL image/png', 'Canvas Blending Support', 'SVG'
+      ],
+      'Storage Features': [
+        'Cookie', 'Web Storage API localStorage', 'Web Storage API sessionStorage', 'IndexedDB'
+      ],
+      'ECMAScript Features': [
+        'ES5', 'ES6 Arrow Functions', 'ES6 Collections', 'ES6 Generators', 'ES6 Promises', 'ES6 Rest parameters',
+        'ES6 Spread array', 'ES6 Template Strings', 'ES6 String', 'ES7 Array'
+      ],
+      'Network Features': [
+        'WebSockets', 'WebRTC Data Channel', 'WebRTC Peer Connections', 'Fetch API', 'ServiceWorker API', 'Server Sent Events'
+      ],
+      'Miscellaneous': [
+        'Geolocation API', 'Battery API', 'Blob Constructor', 'Content Editable', 'Cross-Origin Resource Sharing',
+        'CustomEvent', 'addEventListener', 'Device Motion Event', 'Device Orientation Event', 'onInput Event', 'File API',
+        'Fullscreen API', 'GamePad API', 'iframe[srcdoc] Attribute', 'Native JSON Parsing', 'Notifications API',
+        'Navigation Timing API', 'Pointer Lock API', 'requestAnimationFrame', 'script async', 'Web Cryptography API',
+        'Internationalization API', 'Page Visibility API', 'Custom Elements API', 'Media Source Extensions API',
+        'Channel Messaging API', 'Proxy Object', 'TextEncoder', 'TextDecoder'
+      ],
+      'Additional Features': [
+        'WebGL', 'WebGPU', 'Clipboard API', 'MIDI Support', 'Performance Memory API', 'Touch Events', 'Do Not Track'
+      ]
+    };
+
+    // Run tests and generate table
+    function runFeatureTests() {
+      const tbody = document.getElementById('feature-table');
+      let supportedCount = 0;
+      let totalCount = 0;
+
+      Object.entries(featureCategories).forEach(([category, features]) => {
+        features.forEach(feature => {
+          totalCount++;
+          let supported = false;
+          let notes = '';
+
+          try {
+            supported = featureTests[feature]();
+            if (!supported) {
+              notes = 'Feature not supported in this browser.';
+            }
+          } catch (e) {
+            notes = `Error testing feature: ${e.message}`;
+          }
+
+          if (supported) supportedCount++;
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${category}</td>
+            <td>${feature}</td>
+            <td class="${supported ? 'supported' : 'not-supported'}">${supported ? '✔' : '✗'}</td>
+            <td class="notes">${notes}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+
+      // Update summary
+      document.getElementById('summary').textContent = `Supported Features: ${supportedCount} out of ${totalCount} (${Math.round((supportedCount / totalCount) * 100)}%)`;
+    }
+
+    // Run tests on page load
+    window.addEventListener('load', runFeatureTests);
+  </script>
+</body>
+</html>
