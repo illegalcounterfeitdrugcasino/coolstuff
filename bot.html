@@ -49,14 +49,38 @@
       z-index: 99;
       flex-direction: column;
     }
-    .captcha-check {
+    .captcha-puzzle {
       display: none;
       margin-top: 15px;
-      text-align: left;
+      position: relative;
+      height: 150px;
+      width: 150px;
+      margin-bottom: 20px;
+    }
+    .captcha-puzzle-piece {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #0f62fe;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    .puzzle-container {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      border: 2px solid #0f62fe;
+      margin: 0 auto;
     }
   </style>
 </head>
 <body>
+
+<div id="likeRequest">
+  <h2>Please like this site to continue 😎👍</h2>
+  <button onclick="hideLike()">I liked it</button>
+</div>
 
 <div class="card">
   <h2>Robot Verification</h2>
@@ -64,10 +88,16 @@
   <button onclick="checkBot()">Click to prove you're not a robot</button>
   <div id="result"></div>
   <div id="task">
-    <div class="captcha-check">
-      <input type="checkbox" id="captchaCheckbox"> I am human
+    <div class="captcha-puzzle">
+      <p style="text-align: left;">Solve the puzzle:</p>
+      <div class="puzzle-container" id="puzzleContainer">
+        <div class="captcha-puzzle-piece" id="puzzlePiece1" style="top: 0; left: 0;"></div>
+        <div class="captcha-puzzle-piece" id="puzzlePiece2" style="top: 0; left: 50px;"></div>
+        <div class="captcha-puzzle-piece" id="puzzlePiece3" style="top: 50px; left: 0;"></div>
+        <div class="captcha-puzzle-piece" id="puzzlePiece4" style="top: 50px; left: 50px;"></div>
+      </div>
+      <button onclick="validateTask()" id="submitTask" style="display:none;">Submit</button>
     </div>
-    <button onclick="validateTask()" id="submitTask" style="display:none;">Submit</button>
   </div>
 </div>
 
@@ -146,35 +176,70 @@
   function showResult(suspicious, location, ip) {
     const result = document.getElementById('result');
     const task = document.getElementById('task');
-    const captchaCheck = document.querySelector('.captcha-check');
+    const captchaPuzzle = document.querySelector('.captcha-puzzle');
     const submitTask = document.getElementById('submitTask');
 
     if (suspicious.length === 0) {
       result.innerHTML = `<p style='color:lime'>✅ You're verified as human! (IP: ${ip}, Location: ${location})</p>`;
       task.innerHTML = '';
-      captchaCheck.style.display = 'none';
+      captchaPuzzle.style.display = 'none';
       submitTask.style.display = 'none';
     } else {
       result.innerHTML = `<p style='color:orange'>⚠️ Suspicious traits detected:</p><ul>${suspicious.map(s => `<li>${s}</li>`).join('')}</ul>`;
       
-      // Trigger checkbox CAPTCHA task
-      task.innerHTML = '<p>To continue, please verify you are human by checking the box below:</p>';
-      captchaCheck.style.display = 'block';
+      // Trigger puzzle CAPTCHA task
+      task.innerHTML = '<p>To continue, please solve the puzzle:</p>';
+      captchaPuzzle.style.display = 'block';
       submitTask.style.display = 'inline-block';
     }
   }
 
   function validateTask() {
-    const captchaCheckbox = document.getElementById('captchaCheckbox');
-    const submitTask = document.getElementById('submitTask');
+    const puzzlePiece1 = document.getElementById('puzzlePiece1');
+    const puzzlePiece2 = document.getElementById('puzzlePiece2');
+    const puzzlePiece3 = document.getElementById('puzzlePiece3');
+    const puzzlePiece4 = document.getElementById('puzzlePiece4');
 
-    if (captchaCheckbox.checked) {
-      submitTask.innerHTML = '<p style="color:lime;">✅ Task complete. You may continue.</p>';
-      submitTask.disabled = true;
+    // Simple validation - check if pieces are in correct order
+    if (puzzlePiece1.style.top === '0px' && puzzlePiece1.style.left === '0px' &&
+        puzzlePiece2.style.top === '0px' && puzzlePiece2.style.left === '50px' &&
+        puzzlePiece3.style.top === '50px' && puzzlePiece3.style.left === '0px' &&
+        puzzlePiece4.style.top === '50px' && puzzlePiece4.style.left === '50px') {
+      document.getElementById('submitTask').innerHTML = '<p style="color:lime;">✅ Puzzle complete. You may continue.</p>';
+      document.getElementById('submitTask').disabled = true;
     } else {
-      submitTask.innerHTML = '<p style="color:red;">❌ Please check the box to continue.</p>';
+      document.getElementById('submitTask').innerHTML = '<p style="color:red;">❌ Please solve the puzzle to continue.</p>';
     }
   }
+
+  // Add drag functionality to the puzzle pieces
+  const pieces = document.querySelectorAll('.captcha-puzzle-piece');
+  pieces.forEach(piece => {
+    piece.onmousedown = function(event) {
+      let shiftX = event.clientX - piece.getBoundingClientRect().left;
+      let shiftY = event.clientY - piece.getBoundingClientRect().top;
+
+      piece.style.position = 'absolute';
+      piece.style.zIndex = 1000;
+
+      function moveAt(pageX, pageY) {
+        piece.style.left = pageX - shiftX + 'px';
+        piece.style.top = pageY - shiftY + 'px';
+      }
+
+      document.onmousemove = function(event) {
+        moveAt(event.pageX, event.pageY);
+      };
+
+      piece.onmouseup = function() {
+        document.onmousemove = null;
+        piece.onmouseup = null;
+      };
+    };
+    piece.ondragstart = function() {
+      return false;
+    };
+  });
 </script>
 
 </body>
