@@ -36,6 +36,7 @@
     }
     #task {
       margin-top: 15px;
+      display: none;
     }
     #likeRequest {
       position: absolute;
@@ -48,6 +49,11 @@
       z-index: 99;
       flex-direction: column;
     }
+    .captcha-check {
+      display: none;
+      margin-top: 15px;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -57,7 +63,12 @@
   <p>Click the button below to verify you're human.</p>
   <button onclick="checkBot()">Click to prove you're not a robot</button>
   <div id="result"></div>
-  <div id="task"></div>
+  <div id="task">
+    <div class="captcha-check">
+      <input type="checkbox" id="captchaCheckbox"> I am human
+    </div>
+    <button onclick="validateTask()" id="submitTask" style="display:none;">Submit</button>
+  </div>
 </div>
 
 <script>
@@ -118,13 +129,15 @@
         }
       }
 
-      // Adblock Check
+      // Check if Adblock is running by testing visible content
       const adTest = document.createElement('div');
+      adTest.innerHTML = '&nbsp;';
       adTest.className = 'adsbox';
       document.body.appendChild(adTest);
       window.setTimeout(() => {
         if (adTest.offsetHeight === 0) suspicious.push('Ad blocker detected');
         adTest.remove();
+
         showResult(suspicious, location, ip);
       }, 100);
     });
@@ -133,30 +146,33 @@
   function showResult(suspicious, location, ip) {
     const result = document.getElementById('result');
     const task = document.getElementById('task');
+    const captchaCheck = document.querySelector('.captcha-check');
+    const submitTask = document.getElementById('submitTask');
 
     if (suspicious.length === 0) {
       result.innerHTML = `<p style='color:lime'>✅ You're verified as human! (IP: ${ip}, Location: ${location})</p>`;
       task.innerHTML = '';
+      captchaCheck.style.display = 'none';
+      submitTask.style.display = 'none';
     } else {
       result.innerHTML = `<p style='color:orange'>⚠️ Suspicious traits detected:</p><ul>${suspicious.map(s => `<li>${s}</li>`).join('')}</ul>`;
-      // Ask a simple human task
-      const num1 = Math.floor(Math.random() * 10) + 1;
-      const num2 = Math.floor(Math.random() * 10) + 1;
-      task.innerHTML = `
-        <p>To continue, please solve: <strong>${num1} + ${num2}</strong></p>
-        <input type="number" id="captcha" placeholder="Your answer">
-        <button onclick="validateTask(${num1 + num2})">Submit</button>
-      `;
+      
+      // Trigger checkbox CAPTCHA task
+      task.innerHTML = '<p>To continue, please verify you are human by checking the box below:</p>';
+      captchaCheck.style.display = 'block';
+      submitTask.style.display = 'inline-block';
     }
   }
 
-  function validateTask(correct) {
-    const input = parseInt(document.getElementById('captcha').value, 10);
-    const task = document.getElementById('task');
-    if (input === correct) {
-      task.innerHTML = `<p style='color:lime'>✅ Task complete. You may continue.</p>`;
+  function validateTask() {
+    const captchaCheckbox = document.getElementById('captchaCheckbox');
+    const submitTask = document.getElementById('submitTask');
+
+    if (captchaCheckbox.checked) {
+      submitTask.innerHTML = '<p style="color:lime;">✅ Task complete. You may continue.</p>';
+      submitTask.disabled = true;
     } else {
-      task.innerHTML += `<p style='color:red'>❌ Incorrect. Try again.</p>`;
+      submitTask.innerHTML = '<p style="color:red;">❌ Please check the box to continue.</p>';
     }
   }
 </script>
