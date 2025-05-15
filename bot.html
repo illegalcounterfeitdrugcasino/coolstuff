@@ -1,246 +1,856 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Advanced Bot Check</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .card {
-      background: #222;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px #000;
-      text-align: center;
-      max-width: 400px;
-    }
-    button {
-      padding: 10px 20px;
-      background: #0f62fe;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-    #task {
-      margin-top: 15px;
-      display: none;
-    }
-    #likeRequest {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 99;
-      flex-direction: column;
-    }
-    .captcha-puzzle {
-      display: none;
-      margin-top: 15px;
-      position: relative;
-      height: 150px;
-      width: 150px;
-      margin-bottom: 20px;
-    }
-    .captcha-puzzle-piece {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background-color: #0f62fe;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-    }
-    .puzzle-container {
-      position: relative;
-      width: 150px;
-      height: 150px;
-      border: 2px solid #0f62fe;
-      margin: 0 auto;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Security Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5; /* Standard light gray background */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .captcha-container {
+            background-color: #ffffff;
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 5px 10px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+        .captcha-container:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 8px 15px rgba(0, 0, 0, 0.06);
+        }
+        .checkbox-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #f9fafb; /* Tailwind gray-50 */
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        #bot-checkbox {
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border: 2px solid #9ca3af; /* Tailwind gray-400 */
+            border-radius: 6px;
+            margin-right: 12px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0; /* Prevent checkbox from shrinking */
+        }
+        #bot-checkbox:checked {
+            background-color: #2563eb; /* Tailwind blue-600 */
+            border-color: #2563eb;
+        }
+        #bot-checkbox:checked::before {
+            content: '✓';
+            font-size: 20px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .checkbox-text-label {
+            font-size: 16px;
+            color: #374151; /* Tailwind gray-700 */
+            flex-grow: 1; /* Allow text to grow */
+            text-align: left;
+        }
+        .captcha-logo svg {
+            color: #6b7280; /* Tailwind gray-500 */
+            flex-shrink: 0; /* Prevent logo from shrinking */
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #2563eb; /* Tailwind blue-600 */
+            animation: spin 1s ease infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .task-area {
+            margin-top: 20px;
+            padding: 16px;
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 8px;
+            background-color: #f9fafb;
+        }
+        .task-area label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        .task-area input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .task-area input[type="text"]:focus {
+            border-color: #2563eb; /* Tailwind blue-600 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Tailwind blue-500 focus ring */
+            outline: none;
+        }
+         .honeypot-field {
+            position: absolute;
+            left: -9999px; /* Move off-screen */
+            top: -9999px;
+            opacity: 0;
+            height: 1px;
+            width: 1px;
+        }
+        .submit-btn {
+            background-color: #2563eb; /* Tailwind blue-600 */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background-color 0.2s ease;
+            width: 100%;
+        }
+        .submit-btn:hover {
+            background-color: #1d4ed8; /* Tailwind blue-700 */
+        }
+        .submit-btn:disabled {
+            background-color: #9ca3af; /* Tailwind gray-400 */
+            cursor: not-allowed;
+        }
+        .status-message {
+            margin-top: 16px;
+            font-size: 14px;
+            min-height: 20px; /* Reserve space */
+        }
+        .status-message.success {
+            color: #10b981; /* Tailwind green-500 */
+        }
+        .status-message.error {
+            color: #ef4444; /* Tailwind red-500 */
+        }
+         .status-message.warning {
+            color: #f59e0b; /* Tailwind yellow-500 */
+        }
+        .tracked-data-toggle {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6b7280; /* Tailwind gray-500 */
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .tracked-data-details {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #4b5563; /* Tailwind gray-600 */
+            text-align: left;
+            background-color: #f9fafb;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            max-height: 250px;
+            overflow-y: auto;
+            word-break: break-all;
+            white-space: pre-wrap; /* Preserve whitespace for formatted output */
+        }
+        .tracked-data-details p {
+            margin-bottom: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+        .footer-text {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #9ca3af; /* Tailwind gray-400 */
+        }
+        .footer-text a {
+            color: #6b7280; /* Tailwind gray-500 */
+            text-decoration: none;
+        }
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
+    <div class="captcha-container" id="captchaContainer">
+        <h2 class="text-2xl font-semibold mb-2 text-gray-800">Security Verification</h2>
+        <p class="text-sm text-gray-500 mb-6">Please complete the check below to continue.</p>
 
-<div id="likeRequest">
-  <h2>Please like this site to continue 😎👍</h2>
-  <button onclick="hideLike()">I liked it</button>
-</div>
+        <form id="verification-form" method="post" action="#"> <div class="checkbox-area">
+                <label for="bot-checkbox" class="checkbox-label">
+                    <input type="checkbox" id="bot-checkbox">
+                    <span class="checkbox-text-label ml-3">I'm not a robot</span>
+                </label>
+                <div class="captcha-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+            </div>
 
-<div class="card">
-  <h2>Robot Verification</h2>
-  <p>Click the button below to verify you're human.</p>
-  <button onclick="checkBot()">Click to prove you're not a robot</button>
-  <div id="result"></div>
-  <div id="task">
-    <div class="captcha-puzzle">
-      <p style="text-align: left;">Solve the puzzle:</p>
-      <div class="puzzle-container" id="puzzleContainer">
-        <div class="captcha-puzzle-piece" id="puzzlePiece1" style="top: 0; left: 0;"></div>
-        <div class="captcha-puzzle-piece" id="puzzlePiece2" style="top: 0; left: 50px;"></div>
-        <div class="captcha-puzzle-piece" id="puzzlePiece3" style="top: 50px; left: 0;"></div>
-        <div class="captcha-puzzle-piece" id="puzzlePiece4" style="top: 50px; left: 50px;"></div>
-      </div>
-      <button onclick="validateTask()" id="submitTask" style="display:none;">Submit</button>
+            <input type="text" name="honeypot" class="honeypot-field" autocomplete="off" tabindex="-1">
+
+            <div id="verification-spinner" class="spinner hidden"></div>
+
+            <div id="task-area" class="task-area hidden">
+                 <label for="task-input">Please type the characters below:</label>
+                 <p id="challenge-text" class="my-3 p-3 bg-gray-100 border border-gray-300 rounded-md text-lg font-mono tracking-wider"></p>
+                <input type="text" id="task-input" placeholder="Enter characters here..." autocomplete="off">
+                <button type="button" id="submit-task-btn" class="submit-btn">Verify</button> </div>
+
+            <div id="status-message" class="status-message"></div>
+
+             <input type="hidden" id="verification-token" name="verification_token">
+        </form>
+
+        <div id="tracked-data-toggle" class="tracked-data-toggle">Show Verification Details</div>
+        <div id="tracked-data-details" class="tracked-data-details hidden">
+            <p><strong>Page Load Time:</strong> <span id="page-load-time-data">N/A</span> ms</p>
+            <p><strong>Interaction Time (Checkbox):</strong> <span id="time-to-check-data">N/A</span> ms</p>
+            <p><strong>Mouse Trail (last 15):</strong> <span id="mouse-trail-data">No movement yet</span></p>
+             <p><strong>Avg Mouse Speed:</strong> <span id="mouse-speed-data">N/A</span> px/ms</p>
+            <p><strong>Screen Resolution:</strong> <span id="screen-res-data">N/A</span></p>
+             <p><strong>Color Depth:</strong> <span id="color-depth-data">N/A</span></p>
+             <p><strong>Pixel Depth:</strong> <span id="pixel-depth-data">N/A</span></p>
+             <p><strong>Device Memory:</strong> <span id="device-memory-data">N/A</span> GB</p>
+             <p><strong>Hardware Concurrency:</strong> <span id="hardware-concurrency-data">N/A</span></p>
+            <p><strong>User Agent:</strong> <span id="user-agent-data">N/A</span></p>
+             <p><strong>Navigator.webdriver:</strong> <span id="webdriver-data">N/A</span></p>
+            <p><strong>Typing Speed (Task):</strong> <span id="typing-speed-data">N/A</span> chars/sec</p>
+            <p><strong>Key Press Intervals (avg):</strong> <span id="key-interval-data">N/A</span> ms</p>
+             <p><strong>Task Input Method:</strong> <span id="input-method-data">N/A</span></p>
+            <p><strong>Window Focus Events:</strong> <span id="focus-event-data">0</span></p>
+            <p><strong>Window Blur Events:</strong> <span id="blur-event-data">0</span></p>
+            <p><strong>Canvas Fingerprint:</strong> <span id="canvas-fingerprint-data">N/A</span></p>
+            <p><strong>WebRTC Status:</strong> <span id="webrtc-status-data">N/A</span></p>
+            <p><strong>Plugin Count:</strong> <span id="plugin-count-data">N/A</span></p>
+            <p><strong>Anomalous Clicks:</strong> <span id="irrelevant-clicks-data">0</span></p>
+             <p><strong>Honeypot Filled:</strong> <span id="honeypot-status-data">No</span></p>
+            <p><strong>Calculated Risk Score:</strong> <span id="risk-score-data">0</span></p>
+            <pre><strong>Analysis Log:</strong><div id="analysis-log" style="max-height: 100px; overflow-y: auto; border-top: 1px solid #e5e7eb; padding-top: 5px; margin-top: 5px;"></div></pre>
+        </div>
+
+        <div class="footer-text">
+            Protected by an experimental bot detection system. <a href="#">Learn More</a>
+        </div>
     </div>
-  </div>
-</div>
 
 <script>
-  function hideLike() {
-    document.getElementById('likeRequest').style.display = 'none';
-  }
+    // --- DOM Elements ---
+    const verificationForm = document.getElementById('verification-form');
+    const checkbox = document.getElementById('bot-checkbox');
+    const spinner = document.getElementById('verification-spinner');
+    const taskArea = document.getElementById('task-area');
+    const challengeTextElement = document.getElementById('challenge-text');
+    const taskInput = document.getElementById('task-input');
+    const submitTaskBtn = document.getElementById('submit-task-btn');
+    const statusMessage = document.getElementById('status-message');
+    const trackedDataToggle = document.getElementById('tracked-data-toggle');
+    const trackedDataDetails = document.getElementById('tracked-data-details');
+    const honeypotField = verificationForm.querySelector('input[name="honeypot"]');
+    const verificationTokenField = document.getElementById('verification-token');
+    const analysisLogDiv = document.getElementById('analysis-log');
 
-  async function getIPInfo() {
-    const response = await fetch('https://ipapi.co/json/');
-    const data = await response.json();
-    return data;
-  }
+    // --- Data Display Elements ---
+    const pageLoadTimeData = document.getElementById('page-load-time-data');
+    const timeToCheckData = document.getElementById('time-to-check-data');
+    const mouseTrailData = document.getElementById('mouse-trail-data');
+    const mouseSpeedData = document.getElementById('mouse-speed-data');
+    const screenResData = document.getElementById('screen-res-data');
+    const colorDepthData = document.getElementById('color-depth-data');
+    const pixelDepthData = document.getElementById('pixel-depth-data');
+    const deviceMemoryData = document.getElementById('device-memory-data');
+    const hardwareConcurrencyData = document.getElementById('hardware-concurrency-data');
+    const userAgentData = document.getElementById('user-agent-data');
+    const webdriverData = document.getElementById('webdriver-data');
+    const typingSpeedData = document.getElementById('typing-speed-data');
+    const keyIntervalData = document.getElementById('key-interval-data');
+    const inputMethodData = document.getElementById('input-method-data');
+    const focusEventData = document.getElementById('focus-event-data');
+    const blurEventData = document.getElementById('blur-event-data');
+    const canvasFingerprintData = document.getElementById('canvas-fingerprint-data');
+    const webrtcStatusData = document.getElementById('webrtc-status-data');
+    const pluginCountData = document.getElementById('plugin-count-data');
+    const irrelevantClicksData = document.getElementById('irrelevant-clicks-data');
+    const honeypotStatusData = document.getElementById('honeypot-status-data');
+    const riskScoreData = document.getElementById('risk-score-data');
 
-  function checkBot() {
-    const suspicious = [];
+    // --- Tracking Variables ---
+    const pageLoadTimestamp = Date.now();
+    let mousePath = [];
+    const MAX_MOUSE_PATH_LENGTH = 50; // Increased path length
+    let mouseMoveTimestamp = Date.now();
+    let totalMouseMoveDistance = 0;
+    let timeToCheckbox = 0;
+    let keyPressTimestamps = [];
+    let challengeString = '';
+    let taskStartTime = 0;
+    let focusCount = 0;
+    let blurCount = 0;
+    let anomalousClicks = 0;
+    let taskInputPasted = false;
+    let honeypotFilled = false;
 
-    // Get user data
-    const ua = navigator.userAgent;
-    const lang = navigator.language;
-    const platform = navigator.platform;
-    const memory = navigator.deviceMemory || 0;
-    const cores = navigator.hardwareConcurrency || 0;
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const hasTouch = 'ontouchstart' in window;
-    const plugins = navigator.plugins.length;
+    // --- Risk Score Calculation ---
+    let riskScore = 0;
+    const RISK_THRESHOLDS = {
+        LOW: 20,    // Minimal risk, potentially pass directly
+        MEDIUM: 50, // Requires challenge
+        HIGH: 80    // Likely bot, needs challenge or block
+    };
 
-    // Get IP Info (API request)
-    getIPInfo().then((ipInfo) => {
-      const ip = ipInfo.ip;
-      const city = ipInfo.city;
-      const country = ipInfo.country_name;
-      const isp = ipInfo.org;
-      const location = `${city}, ${country}`;
 
-      // Check if the user is using a VPN, datacenter, or proxy
-      if (isp.includes("Amazon") || isp.includes("Google") || isp.includes("OVH")) {
-        suspicious.push('VPN or cloud service detected (ISP: ' + isp + ')');
-      }
+    // --- Helper Functions ---
 
-      // Device + Browser Checks
-      if (/HeadlessChrome/.test(ua)) suspicious.push('Headless browser detected');
-      if (!lang) suspicious.push('Missing language');
-      if (!platform || platform === 'Win32' && cores === 0) suspicious.push('Suspicious platform or CPU');
-      if (memory < 1) suspicious.push('No memory reported');
-      if (cores < 1) suspicious.push('No CPU cores detected');
-      if (!timezone) suspicious.push('Timezone missing');
-      if (plugins === 0) suspicious.push('No plugins detected');
+    function logAnalysis(message) {
+         const p = document.createElement('p');
+         p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+         analysisLogDiv.appendChild(p);
+         analysisLogDiv.scrollTop = analysisLogDiv.scrollHeight; // Auto-scroll
+    }
 
-      // WebGL Vendor Check
-      const gl = document.createElement('canvas').getContext('webgl');
-      let glVendor = '', glRenderer = '';
-      if (gl) {
-        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-        if (dbg) {
-          glVendor = gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL);
-          glRenderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL);
-          if (/swiftshader|llvmpipe/i.test(glRenderer)) suspicious.push('Software rendering detected');
+    function generateRandomString(length = 6 + Math.floor(Math.random() * 3)) { // Variable length
+        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
         }
-      }
+        return result;
+    }
 
-      // Check if Adblock is running by testing visible content
-      const adTest = document.createElement('div');
-      adTest.innerHTML = '&nbsp;';
-      adTest.className = 'adsbox';
-      document.body.appendChild(adTest);
-      window.setTimeout(() => {
-        if (adTest.offsetHeight === 0) suspicious.push('Ad blocker detected');
-        adTest.remove();
+    function getCanvasFingerprint() {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 200;
+            canvas.height = 50;
+            const txt = `BrowserCanvas ID:${navigator.userAgent} ${new Date().toISOString().slice(0, 10)}`; // Add date variance
+            ctx.textBaseline = "top";
+            ctx.font = "14px 'Arial'";
+            ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = "#f60";
+            ctx.fillRect(125, 1, 62, 20);
+            ctx.fillStyle = "#069";
+            ctx.fillText(txt, 2, 15);
+            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+            ctx.fillText(txt, 4, 17);
+            const dataUrl = canvas.toDataURL();
+            let hash = 0;
+            if (dataUrl.length === 0) return 'empty';
+            for (let i = 0; i < dataUrl.length; i++) {
+                const char = dataUrl.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return Math.abs(hash).toString(36);
+        } catch (e) {
+            logAnalysis(`Error generating canvas fingerprint: ${e.message}`);
+            return 'error';
+        }
+    }
 
-        showResult(suspicious, location, ip);
-      }, 100);
+    function checkWebRTC() {
+        // More comprehensive check for WebRTC interfaces
+        const webrtcSupport = typeof RTCPeerConnection !== 'undefined' ||
+                              typeof webkitRTCPeerConnection !== 'undefined' ||
+                              typeof mozRTCPeerConnection !== 'undefined' ||
+                              typeof MediaStreamTrack !== 'undefined';
+        return webrtcSupport ? "Detected" : "Not Detected";
+    }
+
+    function getBrowserProperties() {
+        return {
+            userAgent: navigator.userAgent,
+            webdriver: navigator.webdriver ? 'True' : 'False',
+            deviceMemory: navigator.deviceMemory || 'N/A',
+            hardwareConcurrency: navigator.hardwareConcurrency || 'N/A',
+            plugins: navigator.plugins ? Array.from(navigator.plugins).map(p => p.name).join(', ') : 'N/A',
+            screen: {
+                width: screen.width,
+                height: screen.height,
+                colorDepth: screen.colorDepth,
+                pixelDepth: screen.pixelDepth,
+                availWidth: screen.availWidth,
+                availHeight: screen.availHeight
+            },
+            language: navigator.language,
+            timezoneOffset: new Date().getTimezoneOffset(),
+             platform: navigator.platform
+        };
+    }
+
+     function calculateMouseSpeed() {
+        if (mousePath.length < 2) return 0;
+        let totalDistance = 0;
+        let totalTime = mousePath[mousePath.length - 1].t - mousePath[0].t;
+
+        for (let i = 1; i < mousePath.length; i++) {
+            const p1 = mousePath[i - 1];
+            const p2 = mousePath[i];
+            totalDistance += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        }
+
+        return totalTime > 0 ? totalDistance / totalTime : 0;
+    }
+
+
+    function updateTrackedDataDisplay() {
+        const avgMouseSpeed = calculateMouseSpeed();
+
+        pageLoadTimeData.textContent = `${Date.now() - pageLoadTimestamp} ms`;
+        timeToCheckData.textContent = `${timeToCheckbox} ms`;
+        mouseTrailData.textContent = mousePath.length > 0 ? mousePath.slice(-10).map(p => `(${p.x},${p.y})`).join(' ') : 'No movement yet';
+        mouseSpeedData.textContent = `${avgMouseSpeed.toFixed(2)} px/ms`;
+
+        const browserProps = getBrowserProperties();
+        screenResData.textContent = `${browserProps.screen.width}x${browserProps.screen.height} (Avail: ${browserProps.screen.availWidth}x${browserProps.screen.availHeight})`;
+        colorDepthData.textContent = browserProps.screen.colorDepth;
+        pixelDepthData.textContent = browserProps.screen.pixelDepth;
+        deviceMemoryData.textContent = browserProps.deviceMemory;
+        hardwareConcurrencyData.textContent = browserProps.hardwareConcurrency;
+        userAgentData.textContent = browserProps.userAgent;
+        webdriverData.textContent = browserProps.webdriver;
+
+        focusEventData.textContent = focusCount;
+        blurEventData.textContent = blurCount;
+        canvasFingerprintData.textContent = getCanvasFingerprint();
+        webrtcStatusData.textContent = checkWebRTC();
+        pluginCountData.textContent = browserProps.plugins === 'N/A' ? 'N/A' : browserProps.plugins.split(',').length;
+        irrelevantClicksData.textContent = anomalousClicks;
+        honeypotStatusData.textContent = honeypotFilled ? 'Yes' : 'No';
+        riskScoreData.textContent = riskScore;
+
+        // Update task-related data only when available
+        if (typingSpeedData.textContent === 'N/A') typingSpeedData.textContent = 'N/A';
+        if (keyIntervalData.textContent === 'N/A') keyIntervalData.textContent = 'N/A';
+        if (inputMethodData.textContent === 'N/A') inputMethodData.textContent = 'N/A';
+    }
+
+    // --- Risk Scoring Logic ---
+
+    function evaluateRisk() {
+        riskScore = 0; // Reset score
+
+        // --- Static/Fingerprinting Checks ---
+        const browserProps = getBrowserProperties();
+
+        if (browserProps.webdriver === 'True') {
+            riskScore += 100; logAnalysis("High risk: navigator.webdriver is true.");
+        }
+         if (browserProps.plugins === 'N/A' || browserProps.plugins === '') {
+             // Lack of common plugins can be a sign of headless browsers
+            riskScore += 10; logAnalysis("Medium risk: No plugins detected.");
+         }
+         // Basic check for screen size inconsistencies (simple heuristic)
+         if (browserProps.screen.width === 0 || browserProps.screen.height === 0 || browserProps.screen.availWidth === 0 || browserProps.screen.availHeight === 0) {
+             riskScore += 20; logAnalysis("High risk: Zero screen dimensions.");
+         }
+        // Add more checks for suspicious user agent patterns, etc. (requires a list/regex)
+
+        // --- Behavioral Checks (Checkbox Interaction) ---
+        const timeToInteract = timeToCheckbox; // Time from page load to checkbox click
+
+        if (timeToInteract < 50) { // Extremely fast interaction
+            riskScore += 40; logAnalysis(`High risk: Very fast interaction time (${timeToInteract}ms).`);
+        } else if (timeToInteract < 300) {
+            riskScore += 20; logAnalysis(`Medium risk: Fast interaction time (${timeToInteract}ms).`);
+        } else if (timeToInteract > 300000) { // More than 5 minutes
+             riskScore += 10; logAnalysis(`Low risk: Very slow interaction time (${timeToInteract}ms).`);
+        }
+
+        const avgMouseSpeed = calculateMouseSpeed();
+        if (mousePath.length < 5 && timeToInteract > 1000) { // Little to no mouse movement for a significant duration
+             riskScore += 25; logAnalysis("High risk: Little mouse movement despite sufficient time.");
+        } else if (avgMouseSpeed > 1.0 && timeToInteract > 500) { // Unnaturally fast mouse movement
+            riskScore += 20; logAnalysis(`High risk: Unnaturally fast mouse speed (${avgMouseSpeed.toFixed(2)} px/ms).`);
+        } else if (mousePath.length > 5) {
+             // Analyze mouse path for straight lines or grids (simple version)
+             let straightLineCount = 0;
+             for (let i = 2; i < mousePath.length; i++) {
+                 const p1 = mousePath[i - 2];
+                 const p2 = mousePath[i - 1];
+                 const p3 = mousePath[i];
+                 // Check if three consecutive points are almost collinear
+                 const area = Math.abs((p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y)) / 2);
+                 if (area < 5) { // Area of triangle is small, points are nearly collinear
+                     straightLineCount++;
+                 }
+             }
+            if (straightLineCount > mousePath.length / 5 && mousePath.length > 10) {
+                 riskScore += 30; logAnalysis(`High risk: Detect Straight mouse movements (${straightLineCount} collinear segments).`);
+            }
+        }
+
+
+        if (focusCount === 0 && blurCount === 0 && timeToInteract > 2000) {
+             riskScore += 10; logAnalysis("Low risk: No window focus/blur events.");
+        }
+         if (blurCount > focusCount + 2) { // Significantly more blur than focus
+             riskScore += 15; logAnalysis("Medium risk: Excessive window blur events.");
+         }
+
+        if (anomalousClicks > 3) {
+             riskScore += (anomalousClicks * 3); logAnalysis(`Medium risk: Multiple clicks outside interactive elements (${anomalousClicks}).`);
+        }
+
+        if (honeypotFilled) {
+            riskScore += 100; logAnalysis("High risk: Honeypot field was filled.");
+        }
+
+         // Add checks for lack of touch support, specific browser inconsistencies, etc.
+
+        updateTrackedDataDisplay();
+        riskScoreData.textContent = riskScore;
+
+        return riskScore;
+    }
+
+    // --- Task Evaluation Logic ---
+    function evaluateTask() {
+         const userInput = taskInput.value;
+         const taskDuration = (Date.now() - taskStartTime) / 1000; // in seconds
+
+        // Heuristic 6: Task correctness
+        if (userInput !== challengeString) {
+            riskScore += 60; logAnalysis("High risk: Challenge input mismatch.");
+            return false; // Task failed
+        } else {
+             logAnalysis("Low risk: Challenge input matches.");
+        }
+
+        // Heuristic 7: Input method (paste vs type)
+        if (taskInputPasted) {
+            riskScore += 40; logAnalysis("High risk: Task input was pasted.");
+            inputMethodData.textContent = "Pasted";
+        } else if (keyPressTimestamps.length === 0 && userInput.length > 0) {
+             riskScore += 30; logAnalysis("Medium risk: Task input without keypress events.");
+             inputMethodData.textContent = "Programmatic (No Key Events)";
+        }
+        else if (keyPressTimestamps.length > 0) {
+            inputMethodData.textContent = "Typed";
+             logAnalysis("Low risk: Task input appears typed.");
+            const charsPerSecond = challengeString.length / taskDuration;
+            typingSpeedData.textContent = `${charsPerSecond.toFixed(2)} chars/sec`;
+
+            if (charsPerSecond > 20) { // Extremely fast typing (adjust based on challenge length)
+                riskScore += 30; logAnalysis(`High risk: Extremely fast typing speed (${charsPerSecond.toFixed(2)} chars/sec).`);
+            } else if (charsPerSecond < 1.0) { // Very slow typing
+                 riskScore += 20; logAnalysis(`Medium risk: Very slow typing speed (${charsPerSecond.toFixed(2)} chars/sec).`);
+            }
+
+            let intervals = [];
+            for (let i = 1; i < keyPressTimestamps.length; i++) {
+                intervals.push(keyPressTimestamps[i].time - keyPressTimestamps[i-1].time);
+            }
+            if (intervals.length > 0) {
+                const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                keyIntervalData.textContent = `${avgInterval.toFixed(2)} ms`;
+                const stdDev = Math.sqrt(intervals.map(x => Math.pow(x - avgInterval, 2)).reduce((a, b) => a + b, 0) / intervals.length);
+
+                if (stdDev < 25 && intervals.length > 5) { // Too consistent intervals
+                     riskScore += 30; logAnalysis(`High risk: Unnaturally consistent key press intervals (StdDev: ${stdDev.toFixed(2)} ms).`);
+                }
+            } else {
+                 keyIntervalData.textContent = `N/A (No intervals recorded)`;
+            }
+        } else {
+             riskScore += 40; logAnalysis("High risk: Unexpected task input condition.");
+             inputMethodData.textContent = "Unknown";
+             typingSpeedData.textContent = `N/A`;
+             keyIntervalData.textContent = `N/A`;
+        }
+
+        updateTrackedDataDisplay();
+        riskScoreData.textContent = riskScore;
+
+        // Return true if task passed and contributing risk is below a certain threshold
+        // This allows for a slightly higher overall score if initial checks were bad but task was human-like
+        return userInput === challengeString && riskScore < 150; // Example threshold after task
+    }
+
+
+    function resetVerification(message = 'Verification failed. Please try again.') {
+        checkbox.checked = false;
+        checkbox.disabled = false;
+        taskArea.classList.add('hidden');
+        taskInput.value = '';
+        submitTaskBtn.disabled = false;
+        spinner.classList.add('hidden');
+        statusMessage.textContent = message;
+        statusMessage.className = 'status-message error';
+
+        // Reset tracking variables for a new attempt
+        pageLoadTimestamp = Date.now();
+        mousePath = [];
+        timeToCheckbox = 0;
+        keyPressTimestamps = [];
+        challengeString = '';
+        taskStartTime = 0;
+        anomalousClicks = 0; // Decide if these should reset or be cumulative
+        honeypotFilled = false;
+        taskInputPasted = false;
+        riskScore = 0; // Reset risk score
+
+        // Reset display
+        updateTrackedDataDisplay(); // Clears relevant fields
+        riskScoreData.textContent = '0';
+        analysisLogDiv.innerHTML = ''; // Clear logs
+         logAnalysis("Verification reset.");
+    }
+
+
+    // --- Event Listeners ---
+
+    document.addEventListener('mousemove', (e) => {
+        const currentTime = Date.now();
+        if (mousePath.length > 0) {
+             const lastPos = mousePath[mousePath.length - 1];
+             const distance = Math.sqrt(Math.pow(e.clientX - lastPos.x, 2) + Math.pow(e.clientY - lastPos.y, 2));
+             totalMouseMoveDistance += distance;
+        }
+        // Store limited points for path analysis, but can calculate speed from all movements
+        if (mousePath.length >= MAX_MOUSE_PATH_LENGTH) mousePath.shift();
+        mousePath.push({ x: e.clientX, y: e.clientY, t: currentTime });
+
+        mouseMoveTimestamp = currentTime; // Update last move time
+        if (!trackedDataDetails.classList.contains('hidden')) updateTrackedDataDisplay();
     });
-  }
 
-  function showResult(suspicious, location, ip) {
-    const result = document.getElementById('result');
-    const task = document.getElementById('task');
-    const captchaPuzzle = document.querySelector('.captcha-puzzle');
-    const submitTask = document.getElementById('submitTask');
+     // Optional: Track scroll (useful if the page has scrollable content)
+     // let lastScrollTime = Date.now();
+     // let scrollCount = 0;
+     // window.addEventListener('scroll', () => {
+     //    const currentTime = Date.now();
+     //    const timeDiff = currentTime - lastScrollTime;
+     //    if (timeDiff < 50) { // Fast scroll
+     //        // Flag suspicious fast scrolling
+     //    }
+     //    lastScrollTime = currentTime;
+     //    scrollCount++;
+     // });
 
-    if (suspicious.length === 0) {
-      result.innerHTML = `<p style='color:lime'>✅ You're verified as human! (IP: ${ip}, Location: ${location})</p>`;
-      task.innerHTML = '';
-      captchaPuzzle.style.display = 'none';
-      submitTask.style.display = 'none';
-    } else {
-      result.innerHTML = `<p style='color:orange'>⚠️ Suspicious traits detected:</p><ul>${suspicious.map(s => `<li>${s}</li>`).join('')}</ul>`;
-      
-      // Trigger puzzle CAPTCHA task
-      task.innerHTML = '<p>To continue, please solve the puzzle:</p>';
-      captchaPuzzle.style.display = 'block';
-      submitTask.style.display = 'inline-block';
-    }
-  }
 
-  function validateTask() {
-    const puzzlePiece1 = document.getElementById('puzzlePiece1');
-    const puzzlePiece2 = document.getElementById('puzzlePiece2');
-    const puzzlePiece3 = document.getElementById('puzzlePiece3');
-    const puzzlePiece4 = document.getElementById('puzzlePiece4');
+    window.addEventListener('focus', () => {
+        focusCount++;
+        if (!trackedDataDetails.classList.contains('hidden')) updateTrackedDataDisplay();
+         logAnalysis("Window focused.");
+    });
+    window.addEventListener('blur', () => {
+        blurCount++;
+        if (!trackedDataDetails.classList.contains('hidden')) updateTrackedDataDisplay();
+         logAnalysis("Window blurred.");
+    });
 
-    // Simple validation - check if pieces are in correct order
-    if (puzzlePiece1.style.top === '0px' && puzzlePiece1.style.left === '0px' &&
-        puzzlePiece2.style.top === '0px' && puzzlePiece2.style.left === '50px' &&
-        puzzlePiece3.style.top === '50px' && puzzlePiece3.style.left === '0px' &&
-        puzzlePiece4.style.top === '50px' && puzzlePiece4.style.left === '50px') {
-      document.getElementById('submitTask').innerHTML = '<p style="color:lime;">✅ Puzzle complete. You may continue.</p>';
-      document.getElementById('submitTask').disabled = true;
-    } else {
-      document.getElementById('submitTask').innerHTML = '<p style="color:red;">❌ Please solve the puzzle to continue.</p>';
-    }
-  }
+    document.addEventListener('click', (e) => {
+        const interactiveElements = ['INPUT', 'BUTTON', 'A', 'LABEL', 'SELECT', 'TEXTAREA'];
+        let target = e.target;
+        let isInteractive = false;
+        // Traverse up the DOM tree to see if click was inside a known interactive element or the container itself
+        while(target && target !== document.body) {
+            if (interactiveElements.includes(target.tagName) || target.closest('.captcha-container')) {
+                isInteractive = true;
+                break;
+            }
+            target = target.parentElement;
+        }
+        if (!isInteractive) {
+            anomalousClicks++;
+             if (!trackedDataDetails.classList.contains('hidden')) updateTrackedDataDisplay();
+             logAnalysis(`Click outside interactive element at (${e.clientX}, ${e.clientY}). Total anomalous clicks: ${anomalousClicks}`);
+        }
+    });
 
-  // Add drag functionality to the puzzle pieces
-  const pieces = document.querySelectorAll('.captcha-puzzle-piece');
-  pieces.forEach(piece => {
-    piece.onmousedown = function(event) {
-      let shiftX = event.clientX - piece.getBoundingClientRect().left;
-      let shiftY = event.clientY - piece.getBoundingClientRect().top;
+     honeypotField.addEventListener('input', () => {
+         if(honeypotField.value !== '') {
+             honeypotFilled = true;
+             logAnalysis("Honeypot field was filled!");
+             if (!trackedDataDetails.classList.contains('hidden')) updateTrackedDataDisplay();
+         }
+     });
 
-      piece.style.position = 'absolute';
-      piece.style.zIndex = 1000;
 
-      function moveAt(pageX, pageY) {
-        piece.style.left = pageX - shiftX + 'px';
-        piece.style.top = pageY - shiftY + 'px';
-      }
+    checkbox.addEventListener('change', async () => {
+        if (checkbox.checked) {
+            timeToCheckbox = Date.now() - pageLoadTimestamp;
+            logAnalysis(`Checkbox clicked. Time from page load: ${timeToCheckbox} ms.`);
+            updateTrackedDataDisplay(); // Update data now that checkbox is clicked
 
-      document.onmousemove = function(event) {
-        moveAt(event.pageX, event.pageY);
-      };
+            checkbox.disabled = true;
+            statusMessage.textContent = 'Analyzing behavior...';
+            statusMessage.className = 'status-message warning'; // Use warning for initial analysis
+            spinner.classList.remove('hidden');
+            taskArea.classList.add('hidden');
+            analysisLogDiv.innerHTML = ''; // Clear previous logs on new attempt
+            logAnalysis("Starting behavior analysis.");
 
-      piece.onmouseup = function() {
-        document.onmousemove = null;
-        piece.onmouseup = null;
-      };
-    };
-    piece.ondragstart = function() {
-      return false;
-    };
-  });
+            evaluateRisk(); // Calculate initial risk score based on behavior up to checkbox click
+
+            // Simulate processing delay
+            await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700)); // Shorter initial delay
+
+            spinner.classList.add('hidden');
+
+            if (riskScore < RISK_THRESHOLDS.LOW) {
+                // Low risk, potentially pass directly (still needs backend verification in real app)
+                statusMessage.textContent = 'Verification Successful!';
+                statusMessage.className = 'status-message success';
+                logAnalysis(`Initial risk score (${riskScore}) is low. Passing verification.`);
+                // In a real application, send data to backend for final check
+                 verificationTokenField.value = 'client_verified_low_risk_' + Date.now(); // Example token
+                 // verificationForm.submit(); // Uncomment in a real form scenario
+                 // Placeholder redirect for demo
+                 setTimeout(() => { console.log("Simulating redirect to success page."); /* window.location.href = '/authorized'; */ }, 1000);
+
+            } else if (riskScore < RISK_THRESHOLDS.HIGH) {
+                // Medium risk, present challenge
+                statusMessage.textContent = 'Additional verification required.';
+                statusMessage.className = 'status-message warning';
+                logAnalysis(`Initial risk score (${riskScore}) is medium. Presenting challenge.`);
+                challengeString = generateRandomString();
+                challengeTextElement.textContent = challengeString;
+                taskInput.value = '';
+                keyPressTimestamps = [];
+                taskInputPasted = false;
+                taskArea.classList.remove('hidden');
+                taskInput.focus();
+                taskStartTime = Date.now();
+                logAnalysis(`Challenge generated: "${challengeString}". Task timing started.`);
+
+            } else {
+                // High risk, likely bot
+                statusMessage.textContent = 'Verification failed. Suspicious activity detected.';
+                statusMessage.className = 'status-message error';
+                logAnalysis(`Initial risk score (${riskScore}) is high. Verification failed.`);
+                resetVerification('Verification failed. Suspicious activity detected.');
+            }
+
+        } else {
+             // Checkbox unchecked - reset state
+             resetVerification('Verification cancelled.');
+        }
+    });
+
+    taskInput.addEventListener('keydown', (e) => {
+        keyPressTimestamps.push({ key: e.key, time: Date.now() });
+    });
+    taskInput.addEventListener('paste', () => {
+        taskInputPasted = true; // Detect paste event
+         logAnalysis("Paste event detected in task input.");
+    });
+
+     // Listen for Enter key on the input field as well
+     taskInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Stop the default action
+            submitTaskBtn.click(); // Trigger the button click
+        }
+    });
+
+
+    submitTaskBtn.addEventListener('click', async () => {
+        submitTaskBtn.disabled = true;
+        statusMessage.textContent = 'Evaluating challenge response...';
+        statusMessage.className = 'status-message warning';
+        spinner.classList.remove('hidden');
+        logAnalysis("Evaluating challenge response.");
+
+        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700)); // Simulate processing delay
+
+        const taskPassed = evaluateTask(); // Evaluate task and update risk score
+
+        spinner.classList.add('hidden');
+
+        if (taskPassed && riskScore < 90) { // Combined evaluation threshold
+            statusMessage.textContent = 'Verification Successful!';
+            statusMessage.className = 'status-message success';
+             logAnalysis(`Challenge passed and final risk score (${riskScore}) is acceptable.`);
+            taskArea.classList.add('hidden');
+            checkbox.disabled = true;
+            trackedDataToggle.style.pointerEvents = 'none'; // Disable toggle after success
+
+            // In a real application, send data/final score/token to backend for final check
+             verificationTokenField.value = 'client_verified_task_passed_' + Date.now() + '_' + riskScore; // Example token with score
+            // verificationForm.submit(); // Uncomment in a real form scenario
+
+            // Placeholder redirect for demo
+            setTimeout(() => { console.log("Simulating redirect to success page."); /* window.location.href = '/authorized'; */ }, 1000);
+
+        } else {
+            statusMessage.textContent = 'Verification failed. Unusual activity detected.';
+            statusMessage.className = 'status-message error';
+            logAnalysis(`Challenge failed or final risk score (${riskScore}) is too high.`);
+            resetVerification('Verification failed. Unusual activity detected.');
+        }
+    });
+
+
+    trackedDataToggle.addEventListener('click', () => {
+        const isHidden = trackedDataDetails.classList.contains('hidden');
+        trackedDataDetails.classList.toggle('hidden');
+        trackedDataToggle.textContent = isHidden ? 'Hide Verification Details' : 'Show Verification Details';
+        if (!isHidden) {
+            updateTrackedDataDisplay(); // Refresh data when shown
+        }
+    });
+
+    // Initial data population and logging
+    updateTrackedDataDisplay();
+    logAnalysis("Page loaded. Security verification initialized.");
+    logAnalysis(`Browser Properties: ${JSON.stringify(getBrowserProperties(), null, 2)}`);
+    logAnalysis(`Canvas Fingerprint: ${getCanvasFingerprint()}`);
+    logAnalysis(`WebRTC Status: ${checkWebRTC()}`);
+    logAnalysis(`Initial Risk Score: ${riskScore}`);
+
+     // Prevent form default submission initially if JS is enabled,
+     // it will be submitted by the script upon successful verification.
+     verificationForm.addEventListener('submit', function(event) {
+         // Only prevent if checkbox is present and not checked, or if verification hasn't marked it successful
+         if (checkbox && (!checkbox.checked || statusMessage.className !== 'status-message success')) {
+             event.preventDefault();
+             if (statusMessage.className !== 'status-message error' && statusMessage.className !== 'status-message warning') {
+                statusMessage.textContent = 'Please complete the verification first.';
+                statusMessage.className = 'status-message error';
+             }
+             logAnalysis("Form submission attempted before successful verification.");
+         } else {
+             logAnalysis("Form submission allowed (presumably after verification).");
+         }
+     });
+
+
 </script>
-
 </body>
 </html>
