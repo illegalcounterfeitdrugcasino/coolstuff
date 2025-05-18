@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Minex VR Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+    <script>
+      AFRAME.registerComponent("menu-handler", {
+        init: function () {
+          const el = this.el;
+          el.addEventListener("click", function (evt) {
+            const target = evt.target.getAttribute("data-target");
+            if (target) {
+              document.querySelectorAll(".mode").forEach((mode) => {
+                mode.setAttribute("visible", false);
+              });
+              document.querySelector(`#${target}`).setAttribute("visible", true);
+            }
+          });
+        },
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene background="color: #000" vr-mode-ui="enabled: true">
+      <!-- Camera -->
+      <a-entity position="0 1.6 0">
+        <a-camera wasd-controls-enabled="true">
+          <a-cursor
+            color="#FF4444"
+            fuse="true"
+            fuse-timeout="1000"
+          ></a-cursor>
+        </a-camera>
+      </a-entity>
+
+      <!-- Main Menu Panel -->
+      <a-entity id="menu" position="0 1.6 -3" menu-handler>
+        <a-plane color="#222" width="2.2" height="2" position="0 0 0"></a-plane>
+        <a-text value="Minex VR Portal" color="orange" position="0 0.8 0" align="center" width="2"></a-text>
+
+        <a-entity position="0 0.4 0">
+          <a-box color="#4CAF50" depth="0.1" height="0.3" width="1.5" position="0 0 0" data-target="mode1"></a-box>
+          <a-text value="Explore Hangar" color="#fff" position="0 0 0.1" align="center" width="1.2"></a-text>
+        </a-entity>
+
+        <a-entity position="0 0 0">
+          <a-box color="#03A9F4" depth="0.1" height="0.3" width="1.5" position="0 0 0" data-target="mode2"></a-box>
+          <a-text value="Space Dock" color="#fff" position="0 0 0.1" align="center" width="1.2"></a-text>
+        </a-entity>
+
+        <a-entity position="0 -0.4 0">
+          <a-box color="#FF5722" depth="0.1" height="0.3" width="1.5" position="0 0 0" data-target="mode3"></a-box>
+          <a-text value="Retro Room" color="#fff" position="0 0 0.1" align="center" width="1.2"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <!-- Mode 1: Hangar View -->
+      <a-entity id="mode1" class="mode" visible="false">
+        <a-sky color="#1a1a1a"></a-sky>
+        <a-box position="0 0.5 -5" width="4" height="3" depth="10" color="#888"></a-box>
+        <a-plane position="0 0.01 -5" width="10" height="10" rotation="-90 0 0" color="#333"></a-plane>
+        <a-text value="Welcome to the Hangar!" color="#FFD700" position="0 2 -4" align="center" width="6"></a-text>
+      </a-entity>
+
+      <!-- Mode 2: Space Dock -->
+      <a-entity id="mode2" class="mode" visible="false">
+        <a-sky color="#000011"></a-sky>
+        <a-entity geometry="primitive: sphere; radius: 1" position="0 1.6 -4" material="color: #2196F3"></a-entity>
+        <a-text value="Orbital Dock Station" color="#00BCD4" position="0 3 -4" align="center" width="6"></a-text>
+        <a-ring position="0 1.6 -3.5" radius-inner="1" radius-outer="1.5" rotation="-90 0 0" color="#777"></a-ring>
+      </a-entity>
+
+      <!-- Mode 3: Retro Room -->
+      <a-entity id="mode3" class="mode" visible="false">
+        <a-sky color="#222"></a-sky>
+        <a-plane position="0 0.01 -4" width="6" height="6" rotation="-90 0 0" color="#444"></a-plane>
+        <a-box position="-1 1 -4" width="0.5" height="1" depth="0.5" color="#FF4081"></a-box>
+        <a-text value="Retro Terminal" color="#FFEB3B" position="0 2 -4" align="center" width="6"></a-text>
+        <a-box position="1 1 -4" width="1" height="1" depth="1" color="#00E676"></a-box>
+      </a-entity>
+
+    </a-scene>
+  </body>
+</html>
