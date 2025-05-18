@@ -2481,6 +2481,7 @@ document.addEventListener('keydown', event => {
     </style>
 </head>
 <body>
+  <a-scene>
       <!-- FLGC Cinematic Loader -->
 <div id="flgc-loader" style="position: fixed; inset: 0; background: black; color: white; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999999; font-family: 'Arial';">
     <div id="flgc-logo" style="opacity: 0; font-size: 8rem; transition: opacity 0.5s;">FLGC</div>
@@ -2952,24 +2953,6 @@ document.addEventListener('keydown', event => {
         </div>
     </div>
 </div>
-<a-scene>
-  <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-  <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-  <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-  <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-  <a-sky color="#ECECEC"></a-sky>
-</a-scene>
-<a-scene>
-  <a-camera>
-    <a-cursor></a-cursor>
-  </a-camera>
-
-  <a-box position="-1 0.5 -3" color="blue"
-         event-set__enter="_event: mouseenter; color: red"
-         event-set__leave="_event: mouseleave; color: blue">
-  </a-box>
-  <a-sky color="#ECECEC"></a-sky>
-</a-scene>
             <div id="crash-game" style="display: none;">
     <h2>Crypto Crash</h2>
     <div id="crash-container" style="position: relative; width: 600px; height: 400px; margin: 20px auto; display: flex;">
@@ -3054,6 +3037,7 @@ document.addEventListener('keydown', event => {
             <div id="loading-ball"></div>
         </div>
     </div>
+    </a-scene>
     <script>
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
