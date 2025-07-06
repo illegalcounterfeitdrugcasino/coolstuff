@@ -10,7 +10,7 @@
   <h2>Submitting Tag...</h2>
 
   <script>
-    // Replace this with your Firebase config
+    // Replace with your actual Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyAIiWvA0EcLsGE0OdEQ6YHne5EDurUVAXU",
   authDomain: "codingprojects-ade75.firebaseapp.com",
@@ -20,21 +20,22 @@ const firebaseConfig = {
   appId: "1:782742130363:web:79e8dbc417c0d2aa3fe39e",
   measurementId: "G-DP2ZRVDTFT"
 };
+
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     async function main() {
-      // Get the tag ID from the URL path
-      const urlParts = window.location.pathname.split('/');
-      const tagId = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2]; // Handles trailing slash
+      // Get tag ID from raw query string (everything after '?')
+      const rawQuery = window.location.search; // like "?E0:04:01:08:50:82:07:65"
+      const tagId = rawQuery.startsWith('?') ? rawQuery.slice(1) : null;
 
-      if (!tagId) {
-        alert("Invalid tag ID in URL.");
+      if (!tagId || tagId.length < 8) {
+        alert("Invalid or missing tag ID in URL.");
         return;
       }
 
-      // Ask the user for the account key
+      // Ask for the account key
       const accountKey = prompt("Enter your account key:");
       if (!accountKey) {
         alert("No account key provided.");
@@ -49,8 +50,8 @@ const firebaseConfig = {
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         document.body.innerHTML = "<h2>Tag uploaded successfully!</h2>";
-      } catch (error) {
-        console.error("Error uploading tag:", error);
+      } catch (err) {
+        console.error("Upload error:", err);
         document.body.innerHTML = "<h2>Failed to upload tag.</h2>";
       }
     }
