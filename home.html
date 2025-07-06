@@ -2,15 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Tag Collector</title>
+  <title>Register Tag</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
 </head>
-<body>
-  <h2>Submitting Tag...</h2>
+<body class="bg-white text-gray-900">
+  <div class="max-w-md mx-auto py-20 px-4">
+    <h2 class="text-3xl font-bold mb-6 text-indigo-600">Register Your Tag</h2>
+    <p class="mb-4 text-gray-700">You're registering tag:</p>
+    <code id="tagDisplay" class="bg-gray-100 p-2 rounded block mb-6 text-sm">loading...</code>
+
+    <form id="tagForm" class="space-y-4">
+      <input type="text" id="accountKey" placeholder="Account Key" required class="w-full px-4 py-2 border rounded" />
+      <input type="email" id="email" placeholder="Email Address" required class="w-full px-4 py-2 border rounded" />
+      <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">Submit</button>
+    </form>
+
+    <p id="error" class="text-red-600 mt-4 hidden"></p>
+  </div>
 
   <script>
-    // Replace with your actual Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyAIiWvA0EcLsGE0OdEQ6YHne5EDurUVAXU",
   authDomain: "codingprojects-ade75.firebaseapp.com",
@@ -21,42 +33,44 @@ const firebaseConfig = {
   measurementId: "G-DP2ZRVDTFT"
 };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    async function main() {
-      // Get tag ID from raw query string (everything after '?')
-      const rawQuery = window.location.search; // like "?E0:04:01:08:50:82:07:65"
-      const tagId = rawQuery.startsWith('?') ? rawQuery.slice(1) : null;
+    const rawQuery = window.location.search;
+    const tagId = rawQuery.startsWith('?') ? rawQuery.slice(1) : null;
+    const tagDisplay = document.getElementById('tagDisplay');
+    tagDisplay.textContent = tagId || "Missing tag ID";
 
-      if (!tagId || tagId.length < 8) {
-        alert("Invalid or missing tag ID in URL.");
-        return;
-      }
+    const form = document.getElementById('tagForm');
+    const errorMsg = document.getElementById('error');
 
-      // Ask for the account key
-      const accountKey = prompt("Enter your account key:");
-      if (!accountKey) {
-        alert("No account key provided.");
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const accountKey = document.getElementById('accountKey').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!tagId || !accountKey || !email) {
+        errorMsg.textContent = "All fields are required and tag ID must be in the URL.";
+        errorMsg.classList.remove("hidden");
         return;
       }
 
       try {
-        // Upload to Firestore
         await db.collection("tags").add({
           tagId: tagId,
           accountKey: accountKey,
+          email: email,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        document.body.innerHTML = "<h2>Tag uploaded successfully!</h2>";
-      } catch (err) {
-        console.error("Upload error:", err);
-        document.body.innerHTML = "<h2>Failed to upload tag.</h2>";
-      }
-    }
 
-    main();
+        window.location.href = "/submitted.html";
+      } catch (err) {
+        errorMsg.textContent = "Error submitting. Try again later.";
+        errorMsg.classList.remove("hidden");
+        console.error(err);
+      }
+    });
   </script>
 </body>
 </html>
