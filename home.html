@@ -961,36 +961,30 @@ body.gold-theme .cert-value.hex-data {
     <div class="feature-desc">100% uptime guarantee, including Offline Play.</div>
 </div>
 <div class="feature" data-modal="appleSiliconModal" tabindex="0" role="button" aria-haspopup="dialog">
-  <div class="feature-icon apple-logo" aria-label="Apple logo or wrench emoji"></div>
+  <div class="feature-icon" aria-label="Apple logo or wrench emoji"></div>
   <div class="feature-title">Optimized for Apple Silicon</div>
   <div class="feature-desc">Runs natively across all Apple chips — Mac, iPhone & iPad.</div>
 </div>
 
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const icon = document.querySelector('.feature-icon.apple-logo');
+  function isAppleDevice() {
+    return /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const icon = document.querySelector('.feature-icon');
     if (!icon) return;
 
-    // Create a canvas to measure the rendered width of the Apple logo character
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    // Use the computed font style of the icon
-    const style = window.getComputedStyle(icon);
-    ctx.font = style.font;
-
-    // Measure the width of the Apple logo character
-    const width = ctx.measureText('').width;
-
-    // If width is zero or very small (likely missing glyph), fallback to wrench emoji
-    if (width === 0 || width < 5) {
-      icon.textContent = '🔧';
+    if (isAppleDevice()) {
+      icon.textContent = '';  // Apple logo U+F8FF
+    } else {
+      icon.textContent = '🔧';  // wrench emoji fallback
     }
   });
 </script>
 
 <style>
-  .feature-icon.apple-logo {
+  .feature-icon {
     font-size: 2em;
   }
 </style>
