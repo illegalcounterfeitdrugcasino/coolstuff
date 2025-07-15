@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Legitimacy Analyzer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center text-indigo-600">Website Legitimacy Analyzer</h1>
+    
+    <div class="space-y-4">
+      <input id="urlInput" type="text" placeholder="Enter website URL (e.g., https://example.com)" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring focus:border-indigo-400"/>
+      <input id="apiKeyInput" type="text" placeholder="Enter your Gemini API Key" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring focus:border-indigo-400"/>
+      <button onclick="analyzeWebsite()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl w-full">Analyze</button>
+    </div>
+
+    <div id="results" class="mt-6 hidden">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Analysis Results</h2>
+      <div id="siteType" class="mb-4 text-gray-700"></div>
+      <div id="ratings" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"></div>
+      <div id="reportPages" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-md w-full">
+      <h3 class="text-lg font-semibold mb-2" id="modalTitle">Notice</h3>
+      <p id="modalMessage" class="text-gray-700 mb-4"></p>
+      <button onclick="closeModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Close</button>
+    </div>
+  </div>
+
+  <script>
+    function showModal(title, message) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalMessage').innerText = message;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    async function analyzeWebsite() {
+      const url = document.getElementById('urlInput').value.trim();
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      const resultsDiv = document.getElementById('results');
+      const siteTypeDiv = document.getElementById('siteType');
+      const ratingsDiv = document.getElementById('ratings');
+      const reportPagesDiv = document.getElementById('reportPages');
+
+      if (!url || !apiKey) {
+        showModal("Input Error", "Please enter both the website URL and your Gemini API key.");
+        return;
+      }
+
+      resultsDiv.classList.add("hidden");
+      siteTypeDiv.innerHTML = '';
+      ratingsDiv.innerHTML = '';
+      reportPagesDiv.innerHTML = '';
+
+      try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const sourceCode = data.contents;
+
+        const geminiResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `Analyze the legitimacy of this website using a strict JSON schema. URL: ${url}\n\nSOURCE CODE:\n${sourceCode}\n\nReturn JSON with:\n- site_type: string\n- ratings: array of 10 items with fields: { title, score (0-100), description }\n- report_pages: array of { title, content }`
+              }]
+            }]
+          })
+        });
+
+        const geminiJson = await geminiResponse.json();
+        const textContent = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        let parsed;
+        try {
+          parsed = JSON.parse(textContent);
+        } catch {
+          throw new Error("Invalid JSON returned from AI.");
+        }
+
+        if (!parsed.ratings || parsed.ratings.length === 0) throw new Error("Empty analysis.");
+
+        siteTypeDiv.innerHTML = `<strong>Site Type:</strong> ${parsed.site_type || 'N/A'}`;
+
+        parsed.ratings.forEach(rating => {
+          const box = document.createElement("div");
+          box.className = "p-4 border rounded-xl bg-gray-50";
+          box.innerHTML = `
+            <h4 class="font-semibold text-gray-800">${rating.title}</h4>
+            <p class="text-sm text-gray-600 mb-1">Score: ${rating.score ?? 'N/A'}/100</p>
+            <p class="text-sm text-gray-700">${rating.description || 'No description'}</p>
+          `;
+          ratingsDiv.appendChild(box);
+        });
+
+        parsed.report_pages.forEach(page => {
+          const pageBox = document.createElement("div");
+          pageBox.className = "p-4 border rounded-xl bg-white shadow";
+          pageBox.innerHTML = `
+            <h5 class="text-md font-bold text-indigo-600">${page.title}</h5>
+            <p class="text-sm text-gray-700 mt-1 whitespace-pre-line">${page.content}</p>
+          `;
+          reportPagesDiv.appendChild(pageBox);
+        });
+
+        resultsDiv.classList.remove("hidden");
+
+      } catch (err) {
+        console.error(err);
+        showModal("Analysis Failed", "Gemini analysis failed. Falling back to keyword-based analysis.");
+        fallbackAnalysis(url);
+      }
+    }
+
+    async function fallbackAnalysis(url) {
+      const resultsDiv = document.getElementById('results');
+      const siteTypeDiv = document.getElementById('siteType');
+      const ratingsDiv = document.getElementById('ratings');
+      const reportPagesDiv = document.getElementById('reportPages');
+
+      try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const source = data.contents.toLowerCase();
+
+        const scoreKeywords = {
+          "login": 10,
+          "signup": 10,
+          "payment": 15,
+          "bitcoin": 20,
+          "free": 10,
+          "download": 10,
+          "email": 5,
+          "password": 5,
+          "suspicious": 15,
+          "limited offer": 15
+        };
+
+        let score = 100;
+        let matchedKeywords = [];
+
+        for (const keyword in scoreKeywords) {
+          if (source.includes(keyword)) {
+            score -= scoreKeywords[keyword];
+            matchedKeywords.push(keyword);
+          }
+        }
+
+        score = Math.max(0, score);
+
+        siteTypeDiv.innerHTML = `<strong>Site Type:</strong> Fallback Estimate`;
+
+        ratingsDiv.innerHTML = `
+          <div class="p-4 border rounded-xl bg-gray-50">
+            <h4 class="font-semibold text-gray-800">Keyword-Based Legitimacy Score</h4>
+            <p class="text-sm text-gray-600 mb-1">Score: ${score}/100</p>
+            <p class="text-sm text-gray-700">Matched keywords: ${matchedKeywords.join(", ") || "None"}</p>
+          </div>
+        `;
+
+        reportPagesDiv.innerHTML = `
+          <div class="p-4 border rounded-xl bg-white shadow">
+            <h5 class="text-md font-bold text-indigo-600">Summary</h5>
+            <p class="text-sm text-gray-700 mt-1">The analysis was done using keyword detection due to API failure. This is a rough estimate and may not fully reflect the legitimacy of the website.</p>
+          </div>
+        `;
+
+        resultsDiv.classList.remove("hidden");
+
+      } catch (e) {
+        console.error(e);
+        showModal("Error", "Unable to perform fallback analysis. Please check the URL or try again later.");
+      }
+    }
+  </script>
+</body>
+</html>
