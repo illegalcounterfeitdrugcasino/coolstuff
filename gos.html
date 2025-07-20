@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gemini OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the OS look and feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none; /* Prevents pull-to-refresh */
+        }
+
+        #os-container {
+            background-size: cover;
+            background-position: center;
+        }
+        
+        /* Glassmorphism effect for UI elements */
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* App icon styles */
+        .app-icon {
+            transition: transform 0.2s ease-in-out;
+        }
+        .app-icon:active {
+            transform: scale(0.9);
+        }
+        .app-icon .icon-bg {
+            transition: all 0.3s ease;
+        }
+
+        /* App window styles */
+        .app-window {
+            resize: both;
+            overflow: auto;
+            min-width: 320px;
+            min-height: 250px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            display: none; /* Hidden by default */
+        }
+        
+        /* BIOS Screen */
+        #bios-screen {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        /* Terminal App */
+        .terminal-output, .terminal-input {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .terminal-input:focus {
+            outline: none;
+        }
+        
+        /* Mobile-specific styles (portrait mode) */
+        @media (orientation: portrait) and (max-width: 768px) {
+            .app-window {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
+                resize: none;
+                min-width: 0;
+                min-height: 0;
+                z-index: 50 !important; /* Ensure it covers everything */
+            }
+            .app-window .title-bar {
+                cursor: default;
+                display: none; /* Hide desktop title bar */
+            }
+            .app-window .mobile-header {
+                display: flex; /* Show mobile header */
+            }
+            .app-window .content {
+                height: calc(100% - 44px); /* Adjust for mobile header */
+            }
+        }
+    </style>
+</head>
+<body class="bg-black overflow-hidden">
+
+    <!-- BIOS Screen -->
+    <div id="bios-screen" class="absolute inset-0 bg-[#000080] text-white p-8 z-[100]">
+        <p>Gemini BIOS v2.0</p>
+        <p>Copyright (C) 2024, Gemini Corp.</p>
+        <br>
+        <div id="bios-log"></div>
+        <br>
+        <p class="animate-pulse">Loading Gemini OS...</p>
+    </div>
+
+    <!-- Main OS UI -->
+    <div id="os-container" class="w-screen h-screen relative flex-col hidden">
+
+        <!-- Status Bar -->
+        <div id="status-bar" class="w-full h-8 px-4 flex justify-between items-center text-white text-sm z-40 glassmorphism">
+            <div id="time" class="font-semibold">12:00 PM</div>
+            <div class="flex items-center space-x-2">
+                <span>📶</span>
+                <span>🔋</span>
+            </div>
+        </div>
+
+        <!-- Main Screen -->
+        <div id="main-screen" class="flex-grow p-8 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-8 content-start">
+            <!-- App icons will be injected here -->
+        </div>
+
+        <!-- Dock -->
+        <div id="dock" class="w-full md:w-auto md:mx-auto mb-4 p-2 flex justify-center items-center space-x-4 z-40">
+             <div class="dock-inner p-2 rounded-2xl glassmorphism flex justify-center items-center space-x-4">
+                <!-- Dock icons will be injected here -->
+             </div>
+        </div>
+        
+        <!-- App Window Container -->
+        <div id="app-windows-container" class="absolute top-0 left-0 w-full h-full pointer-events-none">
+            <!-- App windows will be injected here -->
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CORE OS ELEMENTS ---
+            const osContainer = document.getElementById('os-container');
+            const timeElement = document.getElementById('time');
+            const mainScreen = document.getElementById('main-screen');
+            const dockInner = document.querySelector('.dock-inner');
+            const appWindowsContainer = document.getElementById('app-windows-container');
+            const biosScreen = document.getElementById('bios-screen');
+            const biosLog = document.getElementById('bios-log');
+
+            // --- OS DATA MANAGEMENT ---
+            let osData = {};
+            const defaultOSData = {
+                settings: {
+                    wallpaper: 'https://source.unsplash.com/random/1920x1080?nature,stars'
+                },
+                notes: 'Welcome to Gemini OS! Write something here.',
+                customApps: []
+            };
+
+            function loadOSData() {
+                const data = localStorage.getItem('geminiOSData');
+                osData = data ? JSON.parse(data) : JSON.parse(JSON.stringify(defaultOSData));
+            }
+
+            function saveOSData() {
+                localStorage.setItem('geminiOSData', JSON.stringify(osData));
+            }
+
+            // --- APP DEFINITIONS ---
+            const systemApps = [
+                { id: 'browser', name: 'Browser', icon: '🌐', type: 'iframe', dock: true },
+                { id: 'notes', name: 'Notes', icon: '📝', type: 'notes', dock: true },
+                { id: 'terminal', name: 'Terminal', icon: '📟', type: 'terminal', dock: false },
+                { id: 'calculator', name: 'Calculator', icon: '🧮', type: 'calculator', dock: false },
+                { id: 'installer', name: 'App Installer', icon: '📦', type: 'installer', dock: false },
+                { id: 'settings', name: 'Settings', icon: '⚙️', type: 'settings', dock: true },
+            ];
+            let allApps = [];
+
+            // --- BOOT SEQUENCE ---
+            function runBIOS() {
+                const biosMessages = [
+                    'Initializing memory... 65536 KB OK',
+                    'Detecting primary master... GeminiHDD',
+                    'Detecting primary slave... None',
+                    'Checking system configuration...',
+                    'Loading kernel modules...',
+                    'Booting from C:/',
+                ];
+                let i = 0;
+                function showMessage() {
+                    if (i < biosMessages.length) {
+                        biosLog.innerHTML += `<p>${biosMessages[i]}</p>`;
+                        i++;
+                        setTimeout(showMessage, Math.random() * 300 + 50);
+                    } else {
+                        setTimeout(() => {
+                            biosScreen.style.display = 'none';
+                            osContainer.style.display = 'flex';
+                            initOS();
+                        }, 1000);
+                    }
+                }
+                showMessage();
+            }
+
+            // --- OS INITIALIZATION ---
+            function initOS() {
+                loadOSData();
+                osContainer.style.backgroundImage = `url(${osData.settings.wallpaper})`;
+                allApps = [...systemApps, ...osData.customApps];
+                renderApps();
+                updateTime();
+                setInterval(updateTime, 1000);
+            }
+
+            // --- UI RENDERING ---
+            function renderApps() {
+                mainScreen.innerHTML = '';
+                dockInner.innerHTML = '';
+                allApps.forEach(app => {
+                    const iconHTML = `
+                        <div class="app-icon flex flex-col items-center text-center space-y-2 cursor-pointer" data-app-id="${app.id}">
+                            <div class="icon-bg w-16 h-16 text-4xl flex items-center justify-center rounded-2xl bg-white/30 shadow-lg">${app.icon}</div>
+                            <span class="text-white text-xs font-medium">${app.name}</span>
+                        </div>
+                    `;
+                    if (app.dock) {
+                        dockInner.insertAdjacentHTML('beforeend', iconHTML);
+                    } else {
+                        mainScreen.insertAdjacentHTML('beforeend', iconHTML);
+                    }
+                });
+                
+                document.querySelectorAll('.app-icon').forEach(icon => {
+                    icon.addEventListener('click', () => openApp(icon.dataset.appId));
+                });
+            }
+
+            // --- CORE FUNCTIONALITY ---
+            function updateTime() {
+                const now = new Date();
+                timeElement.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            function openApp(appId) {
+                const app = allApps.find(a => a.id === appId);
+                if (!app) return;
+
+                let appWindow = document.getElementById(`window-${appId}`);
+                if (appWindow) {
+                    appWindow.style.display = 'block';
+                    bringToFront(appWindow);
+                    return;
+                }
+
+                appWindow = document.createElement('div');
+                appWindow.id = `window-${appId}`;
+                appWindow.className = 'app-window absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-gray-200/80 backdrop-blur-md rounded-lg flex flex-col pointer-events-auto';
+                appWindow.style.zIndex = getHighestZIndex() + 1;
+
+                let contentHTML = '';
+                switch (app.type) {
+                    case 'iframe':
+                        contentHTML = `<div class="p-2 bg-gray-300/50 flex items-center space-x-2"><input type="text" class="browser-url flex-grow bg-white rounded px-2 py-1 text-sm focus:outline-none" value="https://www.google.com/webhp?igu=1"><button class="browser-go bg-blue-500 text-white px-3 py-1 rounded text-sm">Go</button></div><iframe class="w-full h-full border-none"></iframe>`;
+                        break;
+                    case 'notes':
+                        contentHTML = `<textarea class="notes-content w-full h-full p-4 bg-transparent text-gray-800 focus:outline-none resize-none">${osData.notes}</textarea>`;
+                        break;
+                    case 'calculator':
+                        contentHTML = getCalculatorHTML();
+                        break;
+                    case 'settings':
+                        contentHTML = `<div class="p-4 space-y-4"><h3 class="font-bold text-lg">Settings</h3><div><label class="block text-sm font-medium text-gray-700">Wallpaper URL</label><div class="mt-1 flex rounded-md shadow-sm"><input type="text" id="wallpaper-input" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300" placeholder="Image URL"><button id="wallpaper-set" class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">Set</button></div></div><div class="mt-4"><button id="reset-os" class="bg-red-500 text-white px-4 py-2 rounded-md text-sm">Reset OS</button></div></div>`;
+                        break;
+                    case 'installer':
+                        contentHTML = `<div class="p-4 space-y-3"><h3 class="font-bold text-lg">App Installer</h3><div><label class="block text-sm font-medium">App Name</label><input type="text" id="app-name-input" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div><div><label class="block text-sm font-medium">Icon (Emoji)</label><input type="text" id="app-icon-input" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div><div><label class="block text-sm font-medium">HTML Content</label><textarea id="app-html-input" rows="6" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md font-mono"></textarea></div><button id="install-app-btn" class="bg-green-500 text-white px-4 py-2 rounded-md">Install App</button></div>`;
+                        break;
+                    case 'terminal':
+                        contentHTML = `<div class="terminal-container bg-black text-white p-2 h-full flex flex-col"><div class="terminal-output flex-grow overflow-y-auto"></div><div class="flex items-center"><span class="text-green-400">user@gemini:~$</span><input type="text" class="terminal-input flex-grow bg-transparent text-white ml-2"></div></div>`;
+                        break;
+                    case 'custom':
+                        contentHTML = `<iframe class="w-full h-full border-none" srcdoc="${app.content.replace(/"/g, '&quot;')}"></iframe>`;
+                        break;
+                }
+
+                appWindow.innerHTML = `
+                    <div class="mobile-header hidden h-11 bg-gray-700 text-white items-center px-4"><button class="mobile-close-btn font-bold text-lg">&lt; Home</button><span class="flex-grow text-center font-semibold">${app.name}</span><div class="w-16"></div></div>
+                    <div class="title-bar h-8 bg-gray-700/80 flex items-center justify-between px-2 cursor-move rounded-t-lg"><span class="text-white text-sm font-semibold">${app.icon} ${app.name}</span><div class="window-controls flex space-x-2"><button class="w-4 h-4 bg-red-500 rounded-full close-btn"></button></div></div>
+                    <div class="content flex-grow overflow-auto bg-gray-100">${contentHTML}</div>`;
+
+                appWindowsContainer.appendChild(appWindow);
+                appWindow.style.display = 'block';
+
+                makeDraggable(appWindow.querySelector('.title-bar'), appWindow);
+                appWindow.querySelector('.close-btn').addEventListener('click', () => appWindow.style.display = 'none');
+                if(appWindow.querySelector('.mobile-close-btn')) {
+                    appWindow.querySelector('.mobile-close-btn').addEventListener('click', () => appWindow.style.display = 'none');
+                }
+                appWindow.addEventListener('mousedown', () => bringToFront(appWindow));
+                setupAppLogic(appWindow, app);
+            }
+            
+            function setupAppLogic(appWindow, app) {
+                switch (app.type) {
+                    case 'iframe':
+                        const urlInput = appWindow.querySelector('.browser-url');
+                        const goBtn = appWindow.querySelector('.browser-go');
+                        const iframe = appWindow.querySelector('iframe');
+                        const loadUrl = () => { let url = urlInput.value.trim(); if (!url.startsWith('http')) { url = 'https://' + url; } iframe.src = url; };
+                        goBtn.addEventListener('click', loadUrl);
+                        urlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loadUrl(); });
+                        iframe.src = "https://www.google.com/webhp?igu=1";
+                        break;
+                    case 'notes':
+                        const textarea = appWindow.querySelector('.notes-content');
+                        textarea.addEventListener('keyup', () => { osData.notes = textarea.value; saveOSData(); });
+                        break;
+                    case 'calculator':
+                        setupCalculator(appWindow);
+                        break;
+                    case 'settings':
+                        const wallpaperInput = appWindow.querySelector('#wallpaper-input');
+                        wallpaperInput.value = osData.settings.wallpaper;
+                        appWindow.querySelector('#wallpaper-set').addEventListener('click', () => {
+                            const newWallpaper = wallpaperInput.value.trim();
+                            if (newWallpaper) { osContainer.style.backgroundImage = `url(${newWallpaper})`; osData.settings.wallpaper = newWallpaper; saveOSData(); }
+                        });
+                        appWindow.querySelector('#reset-os').addEventListener('click', () => {
+                            if (confirm('Are you sure you want to reset the OS? All custom apps and notes will be deleted.')) {
+                                localStorage.removeItem('geminiOSData');
+                                window.location.reload();
+                            }
+                        });
+                        break;
+                    case 'installer':
+                        appWindow.querySelector('#install-app-btn').addEventListener('click', () => {
+                            const name = appWindow.querySelector('#app-name-input').value;
+                            const icon = appWindow.querySelector('#app-icon-input').value;
+                            const content = appWindow.querySelector('#app-html-input').value;
+                            if (name && icon && content) {
+                                const newApp = { id: `custom-${Date.now()}`, name, icon, content, type: 'custom', dock: false };
+                                osData.customApps.push(newApp);
+                                saveOSData();
+                                allApps.push(newApp);
+                                renderApps();
+                                appWindow.style.display = 'none';
+                            } else {
+                                alert('Please fill all fields.');
+                            }
+                        });
+                        break;
+                    case 'terminal':
+                        setupTerminal(appWindow);
+                        break;
+                }
+            }
+
+            // --- WINDOW MANAGEMENT ---
+            function makeDraggable(dragHandle, element) {
+                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+                dragHandle.onmousedown = dragMouseDown;
+
+                function dragMouseDown(e) {
+                    e = e || window.event;
+                    e.preventDefault();
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                    document.onmouseup = closeDragElement;
+                    document.onmousemove = elementDrag;
+                }
+
+                function elementDrag(e) {
+                    e = e || window.event;
+                    e.preventDefault();
+                    pos1 = pos3 - e.clientX;
+                    pos2 = pos4 - e.clientY;
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                    element.style.top = (element.offsetTop - pos2) + "px";
+                    element.style.left = (element.offsetLeft - pos1) + "px";
+                }
+
+                function closeDragElement() {
+                    document.onmouseup = null;
+                    document.onmousemove = null;
+                }
+            }
+
+            function getHighestZIndex() {
+                let highest = 40;
+                document.querySelectorAll('.app-window').forEach(win => {
+                    const z = parseInt(win.style.zIndex, 10);
+                    if (z > highest) highest = z;
+                });
+                return highest;
+            }
+
+            function bringToFront(win) {
+                win.style.zIndex = getHighestZIndex() + 1;
+            }
+
+            // --- APP-SPECIFIC LOGIC ---
+            function getCalculatorHTML() {
+                const buttons = ['C', '⌫', '%', '/', '7', '8', '9', '*', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.', '='];
+                let buttonHTML = buttons.map(btn => {
+                    let classes = 'bg-gray-200 hover:bg-gray-300';
+                    if (['/', '*', '-', '+', '='].includes(btn)) classes = 'bg-orange-400 hover:bg-orange-500 text-white';
+                    if (['C', '⌫', '%'].includes(btn)) classes = 'bg-gray-400 hover:bg-gray-500';
+                    return `<button class="calc-btn ${classes} rounded-lg text-xl font-medium" data-val="${btn}">${btn}</button>`;
+                }).join('');
+                return `
+                    <div class="p-2 h-full flex flex-col bg-gray-500">
+                        <div id="calc-display" class="w-full h-16 bg-gray-700 text-white text-right text-4xl p-2 rounded-t-lg break-all">0</div>
+                        <div class="grid grid-cols-4 gap-2 p-2 flex-grow">
+                            ${buttonHTML}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function setupCalculator(appWindow) {
+                const display = appWindow.querySelector('#calc-display');
+                let currentInput = '0';
+                let operator = null;
+                let previousInput = null;
+
+                appWindow.querySelectorAll('.calc-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const value = button.dataset.val;
+
+                        if (!isNaN(value) || value === '.') {
+                            if (currentInput === '0' && value !== '.') {
+                                currentInput = value;
+                            } else if (!currentInput.includes('.') || value !== '.') {
+                                currentInput += value;
+                            }
+                        } else if (value === 'C') {
+                            currentInput = '0';
+                            operator = null;
+                            previousInput = null;
+                        } else if (value === '⌫') {
+                            currentInput = currentInput.slice(0, -1) || '0';
+                        } else if (value === '=') {
+                            if (operator && previousInput !== null) {
+                                currentInput = String(calculate(parseFloat(previousInput), parseFloat(currentInput), operator));
+                                operator = null;
+                                previousInput = null;
+                            }
+                        } else { // Operator
+                            if (operator && previousInput !== null) {
+                                currentInput = String(calculate(parseFloat(previousInput), parseFloat(currentInput), operator));
+                            }
+                            operator = value;
+                            previousInput = currentInput;
+                            currentInput = '0';
+                        }
+                        display.textContent = currentInput;
+                    });
+                });
+
+                function calculate(a, b, op) {
+                    switch (op) {
+                        case '+': return a + b;
+                        case '-': return a - b;
+                        case '*': return a * b;
+                        case '/': return b === 0 ? 'Error' : a / b;
+                        case '%': return a / 100;
+                        default: return b;
+                    }
+                }
+            }
+            
+            function setupTerminal(win) {
+                const output = win.querySelector('.terminal-output');
+                const input = win.querySelector('.terminal-input');
+                const container = win.querySelector('.terminal-container');
+
+                const print = (text) => { output.innerHTML += `<div>${text}</div>`; output.scrollTop = output.scrollHeight; };
+                const printPrompt = () => { input.value = ''; };
+                
+                print('Welcome to Gemini Terminal. Type "help" for commands.');
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const command = input.value.trim();
+                        print(`<span class="text-green-400">user@gemini:~$</span> ${command}`);
+                        execute(command);
+                        printPrompt();
+                    }
+                });
+                container.addEventListener('click', () => input.focus());
+
+                function execute(cmd) {
+                    const parts = cmd.split(' ');
+                    const command = parts[0].toLowerCase();
+                    const args = parts.slice(1).join(' ');
+
+                    switch (command) {
+                        case 'help':
+                            print('Available commands: help, clear, date, echo, neofetch, ls');
+                            break;
+                        case 'clear':
+                            output.innerHTML = '';
+                            break;
+                        case 'date':
+                            print(new Date().toString());
+                            break;
+                        case 'echo':
+                            print(args);
+                            break;
+                        case 'ls':
+                            print('Listing files in localStorage:');
+                            for (let i = 0; i < localStorage.length; i++) {
+                                print(`- ${localStorage.key(i)}`);
+                            }
+                            break;
+                        case 'neofetch':
+                            print(`
+<pre class="text-cyan-400">
+   .--.      <span class="text-white">user@gemini</span>
+  |o_o |     ---------
+  |:_/ |     <span class="text-white">OS: Gemini OS 2.0</span>
+ //   \\ \\    <span class="text-white">Kernel: JS-DOM v1.0</span>
+(|     | )   <span class="text-white">Uptime: ${Math.floor(performance.now()/1000)}s</span>
+/'\\_   _/\\\`  <span class="text-white">Wallpaper: ${osData.settings.wallpaper.split('/').pop()}</span>
+\\___)=(___/  <span class="text-white">Apps: ${allApps.length} installed</span>
+</pre>
+                            `);
+                            break;
+                        default:
+                            print(`-bash: ${command}: command not found`);
+                    }
+                }
+            }
+
+            // --- START THE OS ---
+            runBIOS();
+        });
+    </script>
+
+</body>
+</html>
