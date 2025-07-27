@@ -68,7 +68,7 @@
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
 
-        // Function to check the zoom level and display debug info
+        // Function to calculate and display the zoom level based on screen width
         function checkZoomLevel() {
             const zoomLevel = window.devicePixelRatio;
             const userAgent = navigator.userAgent;
@@ -76,6 +76,9 @@
             const screenHeight = window.innerHeight;
             const dpi = window.devicePixelRatio * 96;
 
+            // Calculate the zoom level by comparing innerWidth with screen.width
+            const zoomFactor = window.innerWidth / screen.width;
+            
             // Display debug information
             const debugInfo = `
                 User Agent: ${userAgent}
@@ -83,13 +86,13 @@
                 Screen Width: ${screenWidth}px
                 Screen Height: ${screenHeight}px
                 DPI: ${dpi}
-                Zoom Level (estimated): ${zoomLevel === 2 ? '50%' : 'Other'}
+                Zoom Factor (innerWidth / screen.width): ${zoomFactor.toFixed(2)}
             `;
             document.getElementById('debugMessage').textContent = debugInfo;
 
-            // Adjust zoom level validation range here (more inclusive)
-            const validZoomRange = [2.5, 3.5]; // Adjusted range based on your info
-            if (zoomLevel >= validZoomRange[0] && zoomLevel <= validZoomRange[1]) {
+            // Adjust zoom validation range based on zoomFactor
+            const validZoomRange = [0.5, 0.6];  // The range of acceptable zoom factors for 50% zoom (this is a flexible range)
+            if (zoomFactor >= validZoomRange[0] && zoomFactor <= validZoomRange[1]) {
                 document.getElementById('zoomCheckMessage').innerText = "Zoom is set to approximately 50%. Click below to proceed.";
                 document.getElementById('continueButton').disabled = false;
                 document.querySelector('.content').style.display = 'block';
