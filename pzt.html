@@ -34,6 +34,14 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+
+        #debugInfo {
+            margin-top: 20px;
+            font-size: 14px;
+            background-color: #f7f7f7;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -48,22 +56,45 @@
         <button id="continueButton" class="button" disabled>Proceed to Next Step</button>
     </div>
 
+    <!-- Debug Info Section -->
+    <div id="debugInfo">
+        <h3>Debug Information</h3>
+        <p id="debugMessage">Loading debug info...</p>
+    </div>
+
     <script>
         // Function to detect if the user is on iOS
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
 
-        // Function to check the zoom level
+        // Function to check the zoom level and display debug info
         function checkZoomLevel() {
             const zoomLevel = window.devicePixelRatio;
-            // Zoom level check (rough estimate for 50% text size)
-            if (zoomLevel === 2) {
-                document.getElementById('zoomCheckMessage').innerText = "Zoom is set to 50%. Click below to proceed.";
+            const userAgent = navigator.userAgent;
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const dpi = window.devicePixelRatio * 96;
+
+            // Display debug information
+            const debugInfo = `
+                User Agent: ${userAgent}
+                Device Pixel Ratio (DPR): ${zoomLevel}
+                Screen Width: ${screenWidth}px
+                Screen Height: ${screenHeight}px
+                DPI: ${dpi}
+                Zoom Level (estimated): ${zoomLevel === 2 ? '50%' : 'Other'}
+            `;
+            document.getElementById('debugMessage').textContent = debugInfo;
+
+            // Adjust zoom level validation range here (can be fine-tuned based on data)
+            const validZoomRange = [1.8, 2.2]; // Allow slight variations (50% zoom typically corresponds to DPR of 2)
+            if (zoomLevel >= validZoomRange[0] && zoomLevel <= validZoomRange[1]) {
+                document.getElementById('zoomCheckMessage').innerText = "Zoom is set to approximately 50%. Click below to proceed.";
                 document.getElementById('continueButton').disabled = false;
                 document.querySelector('.content').style.display = 'block';
             } else {
-                document.getElementById('zoomCheckMessage').innerText = "Please set your text zoom to 50%.";
+                document.getElementById('zoomCheckMessage').innerText = "Please set your text zoom to approximately 50%.";
                 document.getElementById('continueButton').disabled = true;
             }
         }
