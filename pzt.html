@@ -87,8 +87,8 @@
             `;
             document.getElementById('debugMessage').textContent = debugInfo;
 
-            // Adjust zoom level validation range here (can be fine-tuned based on data)
-            const validZoomRange = [1.8, 2.2]; // Allow slight variations (50% zoom typically corresponds to DPR of 2)
+            // Adjust zoom level validation range here (more inclusive)
+            const validZoomRange = [2.5, 3.5]; // Adjusted range based on your info
             if (zoomLevel >= validZoomRange[0] && zoomLevel <= validZoomRange[1]) {
                 document.getElementById('zoomCheckMessage').innerText = "Zoom is set to approximately 50%. Click below to proceed.";
                 document.getElementById('continueButton').disabled = false;
