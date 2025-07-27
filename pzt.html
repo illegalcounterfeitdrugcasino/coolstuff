@@ -2,122 +2,231 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>iOS Calibration Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Text Zoom Calibration</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Custom font for better readability */
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f3f4f6; /* Light gray background */
+            color: #1f2937; /* Dark text color */
         }
-
-        .content {
-            display: none;
-            margin-top: 20px;
+        /* Ensure elements have rounded corners as per instructions */
+        .rounded-lg {
+            border-radius: 0.5rem;
         }
-
-        .message {
-            font-size: 18px;
-            margin: 20px;
-        }
-
-        .button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        #debugInfo {
-            margin-top: 20px;
-            font-size: 14px;
-            background-color: #f7f7f7;
-            padding: 10px;
-            border: 1px solid #ddd;
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>
-<body>
+<body class="p-4 sm:p-6 md:p-8 lg:p-10 min-h-screen flex flex-col items-center">
+    <div class="max-w-4xl w-full bg-white p-6 sm:p-8 rounded-lg shadow-lg">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-700">iOS Text Zoom Calibration</h1>
+        <p class="text-center text-gray-600 mb-8">
+            This page attempts to detect the current text zoom level on your iOS device using various methods.
+            The results are estimates and may vary.
+        </p>
 
-    <h1>iOS Calibration Test</h1>
+        <!-- Method 1: Computed Font Size of Body Element -->
+        <div id="method1" class="mb-8 p-6 bg-blue-50 rounded-lg shadow-md">
+            <h2 class="text-xl sm:text-2xl font-semibold mb-3 text-blue-800">Method 1: Computed Body Font Size</h2>
+            <p class="mb-2 text-gray-700">
+                <span class="font-medium">Method Description:</span> This method directly reads the computed
+                font size of the <code>&lt;body&gt;</code> element. iOS's text zoom feature often scales this base font size.
+                The default browser font size is typically 16px.
+            </p>
+            <p class="mb-2 text-gray-700">
+                <span class="font-medium">Debugging Info:</span>
+                <span id="debug1-computed-font-size" class="font-mono text-sm bg-gray-100 p-1 rounded"></span>
+            </p>
+            <p class="text-lg font-bold text-blue-600">
+                Estimated Zoom Level: <span id="result1" class="text-blue-800">Calculating...</span>
+            </p>
+        </div>
 
-    <p id="introMessage">This page requires you to set the text zoom to 50% to continue. Please follow the instructions.</p>
+        <!-- Method 2: Measuring REM vs. PX Element Width -->
+        <div id="method2" class="mb-8 p-6 bg-green-50 rounded-lg shadow-md">
+            <h2 class="text-xl sm:text-2xl font-semibold mb-3 text-green-800">Method 2: REM vs. PX Element Measurement</h2>
+            <p class="mb-2 text-gray-700">
+                <span class="font-medium">Method Description:</span> This method creates two hidden elements:
+                one with a fixed width in pixels (e.g., 16px) and another with a width in <code>rem</code> units (e.g., 1rem).
+                By comparing their actual rendered widths, we can infer the text zoom level, as <code>rem</code> units
+                are relative to the root font size, which is affected by text zoom.
+            </p>
+            <div class="hidden">
+                <div id="test-px-element" style="width: 16px; height: 1px;"></div>
+                <div id="test-rem-element" style="width: 1rem; height: 1px;"></div>
+            </div>
+            <p class="mb-2 text-gray-700">
+                <span class="font-medium">Debugging Info:</span>
+                PX Element Width: <span id="debug2-px-width" class="font-mono text-sm bg-gray-100 p-1 rounded"></span>,
+                REM Element Width: <span id="debug2-rem-width" class="font-mono text-sm bg-gray-100 p-1 rounded"></span>
+            </p>
+            <p class="text-lg font-bold text-green-600">
+                Estimated Zoom Level: <span id="result2" class="text-green-800">Calculating...</span>
+            </p>
+        </div>
 
-    <div id="zoomCheckMessage" class="message">Make sure your text size is set to 50%. Once done, click the button below.</div>
+        <!-- Method 3: Measuring Line Height of REM-sized Text -->
+        <div id="method3" class="mb-8 p-6 bg-purple-50 rounded-lg shadow-md">
+            <h2 class="text-xl sm:text-2xl font-semibold mb-3 text-purple-800">Method 3: REM-sized Text Line Height</h2>
+            <p class="mb-2 text-gray-700">
+                <span class="font-medium">Method Description:</span> This method creates a hidden
+                <code>&lt;div&gt;</code> containing a single line of text with its <code>font-size</code> set to <code>1rem</code>.
+                It then measures the actual rendered height of this element. Since <code>rem</code> units scale with text zoom,
+                its height will reveal the zoom factor relative to a baseline (e.g., 16px for 1rem).
+            </p>
+            <div class="hidden">
+                <div id="test-rem-text" style="font-size: 1rem; line-height: 1; white-space: nowrap;">A</div>
+            </div>
+            <p class="mb-2 text-gray-700">
+                <span class="font-medium">Debugging Info:</span>
+                REM Text Height: <span id="debug3-rem-height" class="font-mono text-sm bg-gray-100 p-1 rounded"></span>
+            </p>
+            <p class="text-lg font-bold text-purple-600">
+                Estimated Zoom Level: <span id="result3" class="text-purple-800">Calculating...</span>
+            </p>
+        </div>
 
-    <div class="content">
-        <button id="continueButton" class="button" disabled>Proceed to Next Step</button>
-    </div>
-
-    <!-- Debug Info Section -->
-    <div id="debugInfo">
-        <h3>Debug Information</h3>
-        <p id="debugMessage">Loading debug info...</p>
+        <!-- Final Comparison and Overall Estimate -->
+        <div id="final-estimate" class="p-6 bg-yellow-50 rounded-lg shadow-md">
+            <h2 class="text-xl sm:text-2xl font-semibold mb-3 text-yellow-800">Overall Estimated Zoom Level</h2>
+            <p class="mb-2 text-gray-700">
+                <span class="font-medium">Comparison:</span> Based on the results from the various methods,
+                this is the final combined estimate of your iOS text zoom level.
+            </p>
+            <p class="text-2xl sm:text-3xl font-bold text-yellow-700">
+                Final Estimated Zoom Level: <span id="overall-result" class="text-yellow-900">Calculating...</span>
+            </p>
+        </div>
     </div>
 
     <script>
-        // Function to detect if the user is on iOS
-        function isIOS() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultFontSizePx = 16; // Standard default browser font size
 
-        // Function to calculate and display the zoom level based on screen width
-        function checkZoomLevel() {
-            const zoomLevel = window.devicePixelRatio;
-            const userAgent = navigator.userAgent;
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            const dpi = window.devicePixelRatio * 96;
+            // Array to store results from each method for overall calculation
+            const zoomResults = [];
 
-            // Calculate the zoom level by comparing innerWidth with screen.width
-            const zoomFactor = window.innerWidth / screen.width;
-            
-            // Display debug information
-            const debugInfo = `
-                User Agent: ${userAgent}
-                Device Pixel Ratio (DPR): ${zoomLevel}
-                Screen Width: ${screenWidth}px
-                Screen Height: ${screenHeight}px
-                DPI: ${dpi}
-                Zoom Factor (innerWidth / screen.width): ${zoomFactor.toFixed(2)}
-            `;
-            document.getElementById('debugMessage').textContent = debugInfo;
+            // Method 1: Computed Font Size of Body Element
+            function calculateMethod1() {
+                try {
+                    const bodyComputedStyle = window.getComputedStyle(document.body);
+                    const computedFontSize = parseFloat(bodyComputedStyle.fontSize);
+                    document.getElementById('debug1-computed-font-size').textContent = `${computedFontSize}px`;
 
-            // Adjust zoom validation range based on zoomFactor
-            const validZoomRange = [0.5, 0.6];  // The range of acceptable zoom factors for 50% zoom (this is a flexible range)
-            if (zoomFactor >= validZoomRange[0] && zoomFactor <= validZoomRange[1]) {
-                document.getElementById('zoomCheckMessage').innerText = "Zoom is set to approximately 50%. Click below to proceed.";
-                document.getElementById('continueButton').disabled = false;
-                document.querySelector('.content').style.display = 'block';
-            } else {
-                document.getElementById('zoomCheckMessage').innerText = "Please set your text zoom to approximately 50%.";
-                document.getElementById('continueButton').disabled = true;
-            }
-        }
+                    if (isNaN(computedFontSize) || computedFontSize === 0) {
+                        document.getElementById('result1').textContent = 'Error: Could not get computed font size.';
+                        return null;
+                    }
 
-        // Main script to initialize
-        window.onload = function() {
-            if (isIOS()) {
-                document.getElementById('introMessage').innerText = "This page requires you to set the text zoom to 50%. Please adjust the settings on your device and click below.";
-                checkZoomLevel();
-            } else {
-                document.getElementById('introMessage').innerText = "This test is only for iOS devices.";
-                document.getElementById('zoomCheckMessage').style.display = 'none';
+                    const zoomLevel = computedFontSize / defaultFontSizePx;
+                    document.getElementById('result1').textContent = `${zoomLevel.toFixed(2)}x`;
+                    return zoomLevel;
+                } catch (error) {
+                    console.error("Error in Method 1:", error);
+                    document.getElementById('result1').textContent = `Error: ${error.message}`;
+                    return null;
+                }
             }
 
-            document.getElementById('continueButton').addEventListener('click', function() {
-                alert("You've successfully calibrated the zoom level!");
-                // You can redirect or do other actions here
+            // Method 2: Measuring REM vs. PX Element Width
+            function calculateMethod2() {
+                try {
+                    const pxElement = document.getElementById('test-px-element');
+                    const remElement = document.getElementById('test-rem-element');
+
+                    // Measure actual rendered widths
+                    const pxWidth = pxElement.getBoundingClientRect().width;
+                    const remWidth = remElement.getBoundingClientRect().width;
+
+                    document.getElementById('debug2-px-width').textContent = `${pxWidth}px`;
+                    document.getElementById('debug2-rem-width').textContent = `${remWidth}px`;
+
+                    if (pxWidth === 0 || remWidth === 0 || isNaN(pxWidth) || isNaN(remWidth)) {
+                        document.getElementById('result2').textContent = 'Error: Could not measure element widths.';
+                        return null;
+                    }
+
+                    // The ratio of remWidth to pxWidth (where pxWidth is 16px) should give the zoom
+                    // Because 1rem should be 16px at 1x zoom.
+                    const zoomLevel = remWidth / defaultFontSizePx;
+                    document.getElementById('result2').textContent = `${zoomLevel.toFixed(2)}x`;
+                    return zoomLevel;
+                } catch (error) {
+                    console.error("Error in Method 2:", error);
+                    document.getElementById('result2').textContent = `Error: ${error.message}`;
+                    return null;
+                }
+            }
+
+            // Method 3: Measuring Line Height of REM-sized Text
+            function calculateMethod3() {
+                try {
+                    const remTextElement = document.getElementById('test-rem-text');
+                    // Measure actual rendered height
+                    const remTextHeight = remTextElement.offsetHeight; // offsetHeight gives integer, getBoundingClientRect().height gives float
+
+                    document.getElementById('debug3-rem-height').textContent = `${remTextHeight}px`;
+
+                    if (remTextHeight === 0 || isNaN(remTextHeight)) {
+                        document.getElementById('result3').textContent = 'Error: Could not measure text height.';
+                        return null;
+                    }
+
+                    // Assuming 1rem at 1x zoom results in a height close to 16px (or its line-height)
+                    const zoomLevel = remTextHeight / defaultFontSizePx;
+                    document.getElementById('result3').textContent = `${zoomLevel.toFixed(2)}x`;
+                    return zoomLevel;
+                } catch (error) {
+                    console.error("Error in Method 3:", error);
+                    document.getElementById('result3').textContent = `Error: ${error.message}`;
+                    return null;
+                }
+            }
+
+            // Function to calculate overall average zoom
+            function calculateOverallZoom() {
+                const validResults = zoomResults.filter(result => result !== null);
+                if (validResults.length === 0) {
+                    document.getElementById('overall-result').textContent = 'No valid zoom levels detected.';
+                    return;
+                }
+
+                const sum = validResults.reduce((acc, val) => acc + val, 0);
+                const averageZoom = sum / validResults.length;
+                document.getElementById('overall-result').textContent = `${averageZoom.toFixed(2)}x`;
+            }
+
+            // Run all methods and store results
+            zoomResults.push(calculateMethod1());
+            zoomResults.push(calculateMethod2());
+            zoomResults.push(calculateMethod3());
+
+            // Calculate and display overall zoom
+            calculateOverallZoom();
+
+            // Re-calculate on window resize (though iOS text zoom is usually fixed until changed in settings)
+            // This can still be useful for general responsiveness checks.
+            window.addEventListener('resize', () => {
+                // Clear previous results and re-run
+                document.getElementById('result1').textContent = 'Calculating...';
+                document.getElementById('result2').textContent = 'Calculating...';
+                document.getElementById('result3').textContent = 'Calculating...';
+                document.getElementById('overall-result').textContent = 'Calculating...';
+                zoomResults.length = 0; // Clear array
+
+                zoomResults.push(calculateMethod1());
+                zoomResults.push(calculateMethod2());
+                zoomResults.push(calculateMethod3());
+                calculateOverallZoom();
             });
-        };
+        });
     </script>
-
 </body>
 </html>
