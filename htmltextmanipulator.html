@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Text Manipulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #374151;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-option {
+            position: relative;
+        }
+        
+        .mode-option input[type="radio"] {
+            display: none;
+        }
+        
+        .mode-label {
+            display: block;
+            padding: 15px;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .mode-option input[type="radio"]:checked + .mode-label {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        
+        .mode-label:hover {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+        
+        .mode-option input[type="radio"]:checked + .mode-label:hover {
+            background: #4338ca;
+        }
+        
+        .mode-settings {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .mode-settings.active {
+            display: block;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-group label {
+            font-weight: 500;
+            color: #374151;
+            min-width: 150px;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .number-input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .text-input {
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .text-input:focus, .number-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #4f46e5;
+        }
+        
+        .checkbox-item label {
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            min-width: auto;
+        }
+        
+        textarea {
+            width: 100%;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .input-textarea {
+            height: 200px;
+        }
+        
+        .output-textarea {
+            height: 300px;
+            background-color: #f9fafb;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+        
+        .status-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .stats {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .slider-container {
+                flex-direction: column;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 HTML Text Manipulator</h1>
+            <p>Transform text content in HTML with various manipulation modes</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>Input HTML</h2>
+                <textarea id="inputHtml" class="input-textarea" placeholder="Paste your HTML content here..."></textarea>
+            </div>
+            
+            <div class="section">
+                <h2>Manipulation Mode</h2>
+                <div class="mode-selector">
+                    <div class="mode-option">
+                        <input type="radio" id="communist" name="mode" value="communist" checked>
+                        <label for="communist" class="mode-label">☭ Communist</label>
+                    </div>
+                    <div class="mode-option">
+                        <input type="radio" id="custom" name="mode" value="custom">
+                        <label for="custom" class="mode-label">🔤 Custom Character</label>
+                    </div>
+                    <div class="mode-option">
+                        <input type="radio" id="random" name="mode" value="random">
+                        <label for="random" class="mode-label">🎲 Random Text</label>
+                    </div>
+                    <div class="mode-option">
+                        <input type="radio" id="scramble" name="mode" value="scramble">
+                        <label for="scramble" class="mode-label">🔀 Scramble</label>
+                    </div>
+                    <div class="mode-option">
+                        <input type="radio" id="typo" name="mode" value="typo">
+                        <label for="typo" class="mode-label">✏️ Typo Mode</label>
+                    </div>
+                </div>
+
+                <!-- Communist Mode Settings -->
+                <div id="communist-settings" class="mode-settings active">
+                    <div class="control-group">
+                        <label for="communistPercentage">Replacement %:</label>
+                        <div class="slider-container">
+                            <input type="range" id="communistPercentage" class="slider" min="0.1" max="100" step="0.1" value="10">
+                            <input type="number" id="communistPercentageInput" class="number-input" min="0.1" max="100" step="0.1" value="10">
+                            <span>%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Character Mode Settings -->
+                <div id="custom-settings" class="mode-settings">
+                    <div class="control-group">
+                        <label for="customChar">Custom Character:</label>
+                        <input type="text" id="customChar" class="text-input" value="*" maxlength="10" placeholder="Enter character(s)">
+                    </div>
+                    <div class="control-group">
+                        <label for="customPercentage">Replacement %:</label>
+                        <div class="slider-container">
+                            <input type="range" id="customPercentage" class="slider" min="0.1" max="100" step="0.1" value="15">
+                            <input type="number" id="customPercentageInput" class="number-input" min="0.1" max="100" step="0.1" value="15">
+                            <span>%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Random Text Mode Settings -->
+                <div id="random-settings" class="mode-settings">
+                    <div class="control-group">
+                        <label for="randomPercentage">Replacement %:</label>
+                        <div class="slider-container">
+                            <input type="range" id="randomPercentage" class="slider" min="0.1" max="100" step="0.1" value="20">
+                            <input type="number" id="randomPercentageInput" class="number-input" min="0.1" max="100" step="0.1" value="20">
+                            <span>%</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="randomSource">Text Source:</label>
+                        <input type="text" id="randomSource" class="text-input" value="Lorem ipsum dolor sit amet consectetur adipiscing elit" placeholder="Source text for random replacement">
+                    </div>
+                </div>
+
+                <!-- Scramble Mode Settings -->
+                <div id="scramble-settings" class="mode-settings">
+                    <div class="control-group">
+                        <label for="scrambleType">Scramble Type:</label>
+                        <select id="scrambleType" class="text-input" style="min-width: 200px;">
+                            <option value="word">Scramble within words</option>
+                            <option value="sentence">Scramble words in sentences</option>
+                            <option value="all">Scramble all characters</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="scrambleIntensity">Intensity %:</label>
+                        <div class="slider-container">
+                            <input type="range" id="scrambleIntensity" class="slider" min="1" max="100" step="1" value="50">
+                            <input type="number" id="scrambleIntensityInput" class="number-input" min="1" max="100" step="1" value="50">
+                            <span>%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typo Mode Settings -->
+                <div id="typo-settings" class="mode-settings">
+                    <div class="control-group">
+                        <label for="typoIntensity">Overall Intensity %:</label>
+                        <div class="slider-container">
+                            <input type="range" id="typoIntensity" class="slider" min="1" max="100" step="1" value="25">
+                            <input type="number" id="typoIntensityInput" class="number-input" min="1" max="100" step="1" value="25">
+                            <span>%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="randomSpaces" checked>
+                            <label for="randomSpaces">Random spaces</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="randomCaps" checked>
+                            <label for="randomCaps">Random capitalization</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="swapLetters" checked>
+                            <label for="swapLetters">Swap adjacent letters</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="doubleLetters" checked>
+                            <label for="doubleLetters">Double letters</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="missingLetters" checked>
+                            <label for="missingLetters">Missing letters</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="extraLetters" checked>
+                            <label for="extraLetters">Extra random letters</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="wrongLetters" checked>
+                            <label for="wrongLetters">Wrong letters</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="repeatWords" checked>
+                            <label for="repeatWords">Repeat words</label>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="spaceIntensity">Space Issues %:</label>
+                        <div class="slider-container">
+                            <input type="range" id="spaceIntensity" class="slider" min="0" max="100" step="1" value="30">
+                            <input type="number" id="spaceIntensityInput" class="number-input" min="0" max="100" step="1" value="30">
+                            <span>%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="capsIntensity">Caps Issues %:</label>
+                        <div class="slider-container">
+                            <input type="range" id="capsIntensity" class="slider" min="0" max="100" step="1" value="20">
+                            <input type="number" id="capsIntensityInput" class="number-input" min="0" max="100" step="1" value="20">
+                            <span>%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="processBtn" class="btn btn-primary">Process HTML</button>
+                    <button id="clearBtn" class="btn btn-secondary">Clear All</button>
+                </div>
+                
+                <div id="statusMessage" class="status-message"></div>
+            </div>
+            
+            <div class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="margin: 0;">Output HTML</h2>
+                    <button id="copyBtn" class="btn btn-secondary">Copy to Clipboard</button>
+                </div>
+                <textarea id="outputHtml" class="output-textarea" readonly placeholder="Processed HTML will appear here..."></textarea>
+                
+                <div id="stats" class="stats" style="display: none;">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div id="totalChars" class="stat-value">0</div>
+                            <div class="stat-label">Total Characters</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="modifiedChars" class="stat-value">0</div>
+                            <div class="stat-label">Modified</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="actualPercentage" class="stat-value">0%</div>
+                            <div class="stat-label">Actual %</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="wordsAffected" class="stat-value">0</div>
+                            <div class="stat-label">Words Affected</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TextManipulator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.updateModeSettings();
+            }
+            
+            initializeElements() {
+                this.inputHtml = document.getElementById('inputHtml');
+                this.outputHtml = document.getElementById('outputHtml');
+                this.processBtn = document.getElementById('processBtn');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.copyBtn = document.getElementById('copyBtn');
+                this.statusMessage = document.getElementById('statusMessage');
+                this.stats = document.getElementById('stats');
+                this.totalChars = document.getElementById('totalChars');
+                this.modifiedChars = document.getElementById('modifiedChars');
+                this.actualPercentage = document.getElementById('actualPercentage');
+                this.wordsAffected = document.getElementById('wordsAffected');
+                
+                // Mode elements
+                this.modeRadios = document.querySelectorAll('input[name="mode"]');
+                this.modeSettings = document.querySelectorAll('.mode-settings');
+            }
+            
+            bindEvents() {
+                // Mode switching
+                this.modeRadios.forEach(radio => {
+                    radio.addEventListener('change', () => this.updateModeSettings());
+                });
+                
+                // Slider synchronization
+                this.setupSliderSync('communist');
+                this.setupSliderSync('custom');
+                this.setupSliderSync('random');
+                this.setupSliderSync('scramble', 'Intensity');
+                this.setupSliderSync('typo', 'Intensity');
+                this.setupSliderSync('space', 'Intensity');
+                this.setupSliderSync('caps', 'Intensity');
+                
+                this.processBtn.addEventListener('click', () => this.processHtml());
+                this.clearBtn.addEventListener('click', () => this.clearAll());
+                this.copyBtn.addEventListener('click', () => this.copyToClipboard());
+                
+                // Auto-process on input change (with debounce)
+                let debounceTimer;
+                const autoProcess = () => {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        if (this.inputHtml.value.trim()) {
+                            this.processHtml();
+                        }
+                    }, 500);
+                };
+                
+                this.inputHtml.addEventListener('input', autoProcess);
+                
+                // Add listeners to all controls for auto-processing
+                document.querySelectorAll('input, select').forEach(element => {
+                    if (element.id !== 'inputHtml' && element.id !== 'outputHtml') {
+                        element.addEventListener('input', autoProcess);
+                        element.addEventListener('change', autoProcess);
+                    }
+                });
+            }
+            
+            setupSliderSync(prefix, suffix = 'Percentage') {
+                const slider = document.getElementById(prefix + suffix);
+                const input = document.getElementById(prefix + suffix + 'Input');
+                
+                if (slider && input) {
+                    slider.addEventListener('input', () => {
+                        input.value = slider.value;
+                    });
+                    
+                    input.addEventListener('input', () => {
+                        let value = parseFloat(input.value);
+                        const min = parseFloat(slider.min);
+                        const max = parseFloat(slider.max);
+                        if (value < min) value = min;
+                        if (value > max) value = max;
+                        input.value = value;
+                        slider.value = value;
+                    });
+                }
+            }
+            
+            updateModeSettings() {
+                const selectedMode = document.querySelector('input[name="mode"]:checked').value;
+                
+                this.modeSettings.forEach(setting => {
+                    setting.classList.remove('active');
+                });
+                
+                const activeSettings = document.getElementById(selectedMode + '-settings');
+                if (activeSettings) {
+                    activeSettings.classList.add('active');
+                }
+            }
+            
+            showStatus(message, isError = false) {
+                this.statusMessage.textContent = message;
+                this.statusMessage.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
+                this.statusMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    this.statusMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            clearAll() {
+                this.inputHtml.value = '';
+                this.outputHtml.value = '';
+                this.stats.style.display = 'none';
+                this.statusMessage.style.display = 'none';
+            }
+            
+            extractTextNodes(element) {
+                const textNodes = [];
+                const walker = document.createTreeWalker(
+                    element,
+                    NodeFilter.SHOW_TEXT,
+                    {
+                        acceptNode: (node) => {
+                            const parent = node.parentElement;
+                            if (parent && (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE')) {
+                                return NodeFilter.FILTER_REJECT;
+                            }
+                            return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                        }
+                    }
+                );
+                
+                let node;
+                while (node = walker.nextNode()) {
+                    textNodes.push(node);
+                }
+                
+                return textNodes;
+            }
+            
+            // Communist mode
+            processCommunistMode(textNodes) {
+                const percentage = parseFloat(document.getElementById('communistPercentageInput').value);
+                return this.replaceCharacters(textNodes, '☭', percentage);
+            }
+            
+            // Custom character mode
+            processCustomMode(textNodes) {
+                const customChar = document.getElementById('customChar').value || '*';
+                const percentage = parseFloat(document.getElementById('customPercentageInput').value);
+                return this.replaceCharacters(textNodes, customChar, percentage);
+            }
+            
+            // Random text mode
+            processRandomMode(textNodes) {
+                const percentage = parseFloat(document.getElementById('randomPercentageInput').value);
+                const source = document.getElementById('randomSource').value || 'abcdefghijklmnopqrstuvwxyz';
+                
+                return this.replaceCharacters(textNodes, null, percentage, (char) => {
+                    return source[Math.floor(Math.random() * source.length)];
+                });
+            }
+            
+            // Scramble mode
+            processScrambleMode(textNodes) {
+                const scrambleType = document.getElementById('scrambleType').value;
+                const intensity = parseFloat(document.getElementById('scrambleIntensityInput').value);
+                let modifiedCount = 0;
+                let totalCount = 0;
+                let wordsAffected = 0;
+                
+                textNodes.forEach(node => {
+                    const originalText = node.textContent;
+                    let newText = originalText;
+                    totalCount += originalText.length;
+                    
+                    if (scrambleType === 'word') {
+                        // Scramble letters within words
+                        newText = originalText.replace(/\b\w+\b/g, (word) => {
+                            if (Math.random() * 100 < intensity) {
+                                wordsAffected++;
+                                return this.scrambleWord(word);
+                            }
+                            return word;
+                        });
+                    } else if (scrambleType === 'sentence') {
+                        // Scramble word order in sentences
+                        newText = originalText.replace(/[^.!?]*[.!?]/g, (sentence) => {
+                            if (Math.random() * 100 < intensity) {
+                                const words = sentence.trim().split(/\s+/);
+                                const punctuation = words[words.length - 1].slice(-1);
+                                words[words.length - 1] = words[words.length - 1].slice(0, -1);
+                                
+                                // Shuffle words but keep first and last
+                                if (words.length > 2) {
+                                    const middle = words.slice(1, -1);
+                                    for (let i = middle.length - 1; i > 0; i--) {
+                                        const j = Math.floor(Math.random() * (i + 1));
+                                        [middle[i], middle[j]] = [middle[j], middle[i]];
+                                    }
+                                    const result = [words[0], ...middle, words[words.length - 1]].join(' ') + punctuation;
+                                    wordsAffected += middle.length;
+                                    return result;
+                                }
+                            }
+                            return sentence;
+                        });
+                    } else {
+                        // Scramble all characters
+                        const chars = originalText.split('');
+                        const charsToScramble = Math.floor((intensity / 100) * chars.length);
+                        
+                        for (let i = 0; i < charsToScramble; i++) {
+                            const idx1 = Math.floor(Math.random() * chars.length);
+                            const idx2 = Math.floor(Math.random() * chars.length);
+                            [chars[idx1], chars[idx2]] = [chars[idx2], chars[idx1]];
+                        }
+                        newText = chars.join('');
+                        modifiedCount += charsToScramble;
+                    }
+                    
+                    if (newText !== originalText) {
+                        modifiedCount += Math.abs(newText.length - originalText.length);
+                    }
+                    
+                    node.textContent = newText;
+                });
+                
+                return { modifiedCount, totalCount, wordsAffected };
+            }
+            
+            scrambleWord(word) {
+                if (word.length <= 3) return word;
+                
+                const chars = word.split('');
+                const first = chars.shift();
+                const last = chars.pop();
+                
+                // Shuffle middle characters
+                for (let i = chars.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [chars[i], chars[j]] = [chars[j], chars[i]];
+                }
+                
+                return first + chars.join('') + last;
+            }
+            
+            // Typo mode
+            processTypoMode(textNodes) {
+                const intensity = parseFloat(document.getElementById('typoIntensityInput').value);
+                const spaceIntensity = parseFloat(document.getElementById('spaceIntensityInput').value);
+                const capsIntensity = parseFloat(document.getElementById('capsIntensityInput').value);
+                
+                const typoOptions = {
+                    randomSpaces: document.getElementById('randomSpaces').checked,
+                    randomCaps: document.getElementById('randomCaps').checked,
+                    swapLetters: document.getElementById('swapLetters').checked,
+                    doubleLetters: document.getElementById('doubleLetters').checked,
+                    missingLetters: document.getElementById('missingLetters').checked,
+                    extraLetters: document.getElementById('extraLetters').checked,
+                    wrongLetters: document.getElementById('wrongLetters').checked,
+                    repeatWords: document.getElementById('repeatWords').checked
+                };
+                
+                let modifiedCount = 0;
+                let totalCount = 0;
+                let wordsAffected = 0;
+                
+                textNodes.forEach(node => {
+                    const originalText = node.textContent;
+                    let newText = originalText;
+                    totalCount += originalText.length;
+                    
+                    // Apply typos word by word
+                    newText = newText.replace(/\b\w+\b/g, (word, offset) => {
+                        if (Math.random() * 100 > intensity) return word;
+                        
+                        let modifiedWord = word;
+                        const originalWord = word;
+                        
+                        // Random capitalization
+                        if (typoOptions.randomCaps && Math.random() * 100 < capsIntensity) {
+                            modifiedWord = modifiedWord.split('').map(char => {
+                                return Math.random() < 0.5 ? char.toLowerCase() : char.toUpperCase();
+                            }).join('');
+                        }
+                        
+                        // Swap adjacent letters
+                        if (typoOptions.swapLetters && modifiedWord.length > 1 && Math.random() < 0.3) {
+                            const chars = modifiedWord.split('');
+                            const idx = Math.floor(Math.random() * (chars.length - 1));
+                            [chars[idx], chars[idx + 1]] = [chars[idx + 1], chars[idx]];
+                            modifiedWord = chars.join('');
+                        }
+                        
+                        // Double letters
+                        if (typoOptions.doubleLetters && Math.random() < 0.2) {
+                            const idx = Math.floor(Math.random() * modifiedWord.length);
+                            modifiedWord = modifiedWord.slice(0, idx + 1) + modifiedWord[idx] + modifiedWord.slice(idx + 1);
+                        }
+                        
+                        // Missing letters
+                        if (typoOptions.missingLetters && modifiedWord.length > 2 && Math.random() < 0.2) {
+                            const idx = Math.floor(Math.random() * modifiedWord.length);
+                            modifiedWord = modifiedWord.slice(0, idx) + modifiedWord.slice(idx + 1);
+                        }
+                        
+                        // Extra random letters
+                        if (typoOptions.extraLetters && Math.random() < 0.15) {
+                            const letters = 'abcdefghijklmnopqrstuvwxyz';
+                            const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                            const idx = Math.floor(Math.random() * (modifiedWord.length + 1));
+                            modifiedWord = modifiedWord.slice(0, idx) + randomLetter + modifiedWord.slice(idx);
+                        }
+                        
+                        // Wrong letters
+                        if (typoOptions.wrongLetters && modifiedWord.length > 0 && Math.random() < 0.2) {
+                            const letters = 'abcdefghijklmnopqrstuvwxyz';
+                            const idx = Math.floor(Math.random() * modifiedWord.length);
+                            const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                            modifiedWord = modifiedWord.slice(0, idx) + randomLetter + modifiedWord.slice(idx + 1);
+                        }
+                        
+                        // Repeat words (handled at sentence level)
+                        if (typoOptions.repeatWords && Math.random() < 0.1) {
+                            modifiedWord = modifiedWord + ' ' + modifiedWord;
+                        }
+                        
+                        if (modifiedWord !== originalWord) {
+                            wordsAffected++;
+                        }
+                        
+                        return modifiedWord;
+                    });
+                    
+                    // Random spaces
+                    if (typoOptions.randomSpaces && Math.random() * 100 < spaceIntensity) {
+                        // Add random spaces
+                        newText = newText.replace(/\S/g, (char) => {
+                            return Math.random() < 0.1 ? char + ' ' : char;
+                        });
+                        
+                        // Remove some spaces
+                        newText = newText.replace(/\s+/g, (spaces) => {
+                            return Math.random() < 0.3 ? '' : Math.random() < 0.5 ? ' ' : spaces;
+                        });
+                    }
+                    
+                    modifiedCount += Math.abs(newText.length - originalText.length);
+                    node.textContent = newText;
+                });
+                
+                return { modifiedCount, totalCount, wordsAffected };
+            }
+            
+            // Generic character replacement function
+            replaceCharacters(textNodes, replacement, percentage, customReplacer = null) {
+                let allCharacters = [];
+                let nodeCharacterMap = [];
+                
+                textNodes.forEach((node, nodeIndex) => {
+                    const text = node.textContent;
+                    for (let i = 0; i < text.length; i++) {
+                        if (text[i].trim()) {
+                            allCharacters.push({
+                                char: text[i],
+                                nodeIndex: nodeIndex,
+                                charIndex: i
+                            });
+                        }
+                    }
+                    nodeCharacterMap[nodeIndex] = text.split('');
+                });
+                
+                if (allCharacters.length === 0) {
+                    return { modifiedCount: 0, totalCount: 0, wordsAffected: 0 };
+                }
+                
+                const totalChars = allCharacters.length;
+                const charsToReplace = Math.round((percentage / 100) * totalChars);
+                
+                // Randomly select characters to replace
+                const shuffled = [...allCharacters].sort(() => Math.random() - 0.5);
+                const toReplace = shuffled.slice(0, charsToReplace);
+                
+                // Apply replacements
+                toReplace.forEach(item => {
+                    const newChar = customReplacer ? customReplacer(item.char) : replacement;
+                    nodeCharacterMap[item.nodeIndex][item.charIndex] = newChar;
+                });
+                
+                // Update text nodes
+                textNodes.forEach((node, nodeIndex) => {
+                    node.textContent = nodeCharacterMap[nodeIndex].join('');
+                });
+                
+                return { 
+                    modifiedCount: charsToReplace, 
+                    totalCount: totalChars, 
+                    wordsAffected: Math.ceil(charsToReplace / 5) // Rough estimate
+                };
+            }
+            
+            processHtml() {
+                const htmlContent = this.inputHtml.value.trim();
+                if (!htmlContent) {
+                    this.showStatus('Please enter some HTML content', true);
+                    return;
+                }
+                
+                const selectedMode = document.querySelector('input[name="mode"]:checked').value;
+                
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlContent, 'text/html');
+                    const targetElement = doc.body || doc.documentElement;
+                    const textNodes = this.extractTextNodes(targetElement);
+                    
+                    if (textNodes.length === 0) {
+                        this.showStatus('No visible text content found in the HTML', true);
+                        return;
+                    }
+                    
+                    let result;
+                    
+                    switch (selectedMode) {
+                        case 'communist':
+                            result = this.processCommunistMode(textNodes);
+                            break;
+                        case 'custom':
+                            result = this.processCustomMode(textNodes);
+                            break;
+                        case 'random':
+                            result = this.processRandomMode(textNodes);
+                            break;
+                        case 'scramble':
+                            result = this.processScrambleMode(textNodes);
+                            break;
+                        case 'typo':
+                            result = this.processTypoMode(textNodes);
+                            break;
+                        default:
+                            result = this.processCommunistMode(textNodes);
+                    }
+                    
+                    // Get the modified HTML
+                    let modifiedHtml;
+                    if (doc.documentElement.innerHTML.includes('<body>')) {
+                        modifiedHtml = doc.documentElement.outerHTML;
+                    } else {
+                        modifiedHtml = doc.documentElement.innerHTML;
+                    }
+                    
+                    // Clean up HTML
+                    if (modifiedHtml.startsWith('<!DOCTYPE html>')) {
+                        modifiedHtml = modifiedHtml.replace('<!DOCTYPE html>', '').trim();
+                    }
+                    
+                    this.outputHtml.value = modifiedHtml;
+                    
+                    // Update statistics
+                    const actualPercentage = result.totalCount > 0 ? 
+                        ((result.modifiedCount / result.totalCount) * 100).toFixed(1) : 0;
+                    
+                    this.totalChars.textContent = result.totalCount.toLocaleString();
+                    this.modifiedChars.textContent = result.modifiedCount.toLocaleString();
+                    this.actualPercentage.textContent = actualPercentage + '%';
+                    this.wordsAffected.textContent = result.wordsAffected.toLocaleString();
+                    this.stats.style.display = 'block';
+                    
+                    const modeNames = {
+                        communist: 'Communist',
+                        custom: 'Custom Character',
+                        random: 'Random Text',
+                        scramble: 'Scramble',
+                        typo: 'Typo'
+                    };
+                    
+                    this.showStatus(`${modeNames[selectedMode]} mode applied: ${result.modifiedCount} changes made`);
+                    
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    this.showStatus('Error processing HTML: ' + error.message, true);
+                }
+            }
+            
+            async copyToClipboard() {
+                const text = this.outputHtml.value;
+                if (!text) {
+                    this.showStatus('Nothing to copy', true);
+                    return;
+                }
+                
+                // Multiple fallback strategies for maximum compatibility
+                let copySuccess = false;
+                let errorMessage = '';
+                
+                // Strategy 1: Modern Clipboard API
+                if (!copySuccess && navigator.clipboard && navigator.clipboard.writeText) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        copySuccess = true;
+                        this.showStatus('Copied to clipboard successfully!');
+                    } catch (error) {
+                        console.log('Clipboard API failed:', error);
+                        errorMessage = error.message;
+                    }
+                }
+                
+                // Strategy 2: execCommand fallback with temporary textarea
+                if (!copySuccess) {
+                    try {
+                        const tempTextarea = document.createElement('textarea');
+                        tempTextarea.value = text;
+                        tempTextarea.style.position = 'fixed';
+                        tempTextarea.style.left = '-9999px';
+                        tempTextarea.style.top = '-9999px';
+                        document.body.appendChild(tempTextarea);
+                        
+                        tempTextarea.focus();
+                        tempTextarea.select();
+                        tempTextarea.setSelectionRange(0, text.length);
+                        
+                        const successful = document.execCommand('copy');
+                        document.body.removeChild(tempTextarea);
+                        
+                        if (successful) {
+                            copySuccess = true;
+                            this.showStatus('Copied to clipboard successfully!');
+                        }
+                    } catch (error) {
+                        console.log('execCommand failed:', error);
+                        errorMessage = error.message;
+                    }
+                }
+                
+                // Strategy 3: Direct textarea selection as final fallback
+                if (!copySuccess) {
+                    try {
+                        this.outputHtml.focus();
+                        this.outputHtml.select();
+                        this.outputHtml.setSelectionRange(0, text.length);
+                        
+                        const successful = document.execCommand('copy');
+                        
+                        if (successful) {
+                            copySuccess = true;
+                            this.showStatus('Copied to clipboard successfully!');
+                        } else {
+                            this.showStatus('Text selected - press Cmd+C (Mac) or Ctrl+C to copy', false);
+                            return;
+                        }
+                    } catch (error) {
+                        console.log('Final fallback failed:', error);
+                        errorMessage = error.message;
+                    }
+                }
+                
+                // If all strategies failed
+                if (!copySuccess) {
+                    this.outputHtml.focus();
+                    this.outputHtml.select();
+                    this.showStatus('Auto-copy failed. Text is selected - press Cmd+C (Mac) or Ctrl+C to copy manually.', true);
+                }
+            }
+        }
+        
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TextManipulator();
+        });
+    </script>
+</body>
+</html>
