@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PwaOS">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/000000/ffffff?text=OS">
+    <title>PwaOS</title>
+    <style>
+        :root {
+            --background-image: url('https://source.unsplash.com/random/1080x1920?nature,water');
+            --font-color: #ffffff;
+            --dock-bg: rgba(0, 0, 0, 0.3);
+            --app-icon-label-bg: rgba(0, 0, 0, 0.2);
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--font-color);
+        }
+        #os-container {
+            width: 100%;
+            height: 100%;
+            background: var(--background-image) no-repeat center center/cover;
+            position: relative;
+        }
+        #status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            box-sizing: border-box;
+            background: rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-size: 14px;
+        }
+        #home-screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            transition: transform 0.3s ease-in-out;
+        }
+        .page {
+            min-width: 100%;
+            height: 100%;
+            padding: 40px 20px 100px 20px;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 90px;
+            gap: 15px;
+            align-content: flex-start;
+        }
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            text-decoration: none;
+            color: var(--font-color);
+        }
+        .app-icon .icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--app-icon-label-bg);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .app-icon .label {
+            font-size: 12px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+        #dock {
+            position: absolute;
+            bottom: 10px;
+            left: 5%;
+            width: 90%;
+            height: 80px;
+            background: var(--dock-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        .app-window {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f0f0f0;
+            color: #000;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            transform: scale(1.1);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .app-window.active {
+            display: flex;
+            transform: scale(1);
+            opacity: 1;
+        }
+        .app-header {
+            width: 100%;
+            height: 44px;
+            background: #e9e9e9;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        .close-btn {
+            background: #ff5f56;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid #e0443e;
+            cursor: pointer;
+        }
+        .app-content {
+            flex-grow: 1;
+            overflow: auto;
+            padding: 15px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #page-indicator {
+            position: absolute;
+            bottom: 100px;
+            width: 100%;
+            text-align: center;
+        }
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            margin: 0 4px;
+            transition: background 0.3s;
+        }
+        .dot.active {
+            background: white;
+        }
+        #camera-view {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            border: 5px solid rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div id="os-container">
+    <div id="status-bar">
+        <span id="time"></span>
+        <span> PwaOS </span>
+        <span>
+            <span id="wifi-icon">📶</span>
+            <span id="battery-level">100%</span> 🔋
+        </span>
+    </div>
+
+    <div id="home-screen">
+        <!-- Pages will be generated by JS -->
+    </div>
+
+    <div id="page-indicator">
+        <!-- Dots will be generated by JS -->
+    </div>
+
+    <div id="dock">
+        <a href="#" class="app-icon" data-app="browser">
+            <div class="icon">🌐</div>
+            <div class="label">Browser</div>
+        </a>
+        <a href="#" class="app-icon" data-app="camera">
+            <div class="icon">📷</div>
+            <div class="label">Camera</div>
+        </a>
+        <a href="#" class="app-icon" data-app="app-installer">
+            <div class="icon">➕</div>
+            <div class="label">Install</div>
+        </a>
+        <a href="#" class="app-icon" data-app="settings">
+            <div class="icon">⚙️</div>
+            <div class="label">Settings</div>
+        </a>
+    </div>
+
+    <!-- App Windows -->
+    <div id="browser-window" class="app-window">
+        <div class="app-header">
+            <div class="close-btn"></div>
+        </div>
+        <div class="app-content" style="padding:0; display: flex; flex-direction: column;">
+            <div style="padding: 5px; background: #ddd; display: flex;">
+                <input type="text" id="url-bar" placeholder="https://example.com" style="flex-grow: 1; padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                <button id="go-btn" style="margin-left: 5px; padding: 5px 10px; border-radius: 5px; border: none; background: #4CAF50; color: white;">Go</button>
+            </div>
+            <iframe id="browser-frame"></iframe>
+        </div>
+    </div>
+
+    <div id="camera-window" class="app-window">
+        <div class="app-header">
+            <div class="close-btn"></div>
+        </div>
+        <div class="app-content" style="padding:0; background: black; position: relative;">
+            <video id="camera-view" autoplay playsinline></video>
+            <button id="capture-btn"></button>
+        </div>
+    </div>
+    
+    <div id="app-installer-window" class="app-window">
+        <div class="app-header"><div class="close-btn"></div></div>
+        <div class="app-content">
+            <h3>Install New App</h3>
+            <p>Install from URL:</p>
+            <input type="text" id="install-url" placeholder="App URL" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
+            <input type="text" id="install-name-url" placeholder="App Name" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
+            <button id="install-from-url-btn" style="padding: 10px 15px;">Install</button>
+            <hr style="margin: 20px 0;">
+            <p>Install from Custom HTML:</p>
+            <input type="text" id="install-name-html" placeholder="App Name" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
+            <textarea id="install-html" placeholder="<p>Hello World</p>" style="width: calc(100% - 20px); height: 150px; padding: 10px; margin-bottom: 10px;"></textarea>
+            <button id="install-from-html-btn" style="padding: 10px 15px;">Install</button>
+        </div>
+    </div>
+
+    <div id="settings-window" class="app-window">
+        <div class="app-header"><div class="close-btn"></div></div>
+        <div class="app-content">
+            <h3>Settings</h3>
+            <p>Change Wallpaper:</p>
+            <input type="text" id="wallpaper-url" placeholder="Image URL" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
+            <button id="change-wallpaper-btn" style="padding: 10px 15px;">Set</button>
+             <hr style="margin: 20px 0;">
+            <p>Reset PwaOS:</p>
+            <button id="reset-os-btn" style="padding: 10px 15px; background-color: #ff5f56; color: white;">Reset All Data</button>
+        </div>
+    </div>
+
+    <!-- Generic App Window for installed apps -->
+    <div id="generic-app-window" class="app-window">
+        <div class="app-header">
+            <div class="close-btn"></div>
+            <span id="generic-app-title" style="margin-left: 10px; font-weight: bold;"></span>
+        </div>
+        <div id="generic-app-content" class="app-content" style="padding:0;"></div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const osContainer = document.getElementById('os-container');
+        const timeEl = document.getElementById('time');
+        const homeScreen = document.getElementById('home-screen');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        let currentPage = 0;
+        let startX = 0;
+        let isDragging = false;
+        
+        const preinstalledApps = [
+            { name: 'Calculator', icon: '🧮', content: '<iframe src="https://www.google.com/search?q=calculator" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Weather', icon: '☀️', content: '<iframe src="https://www.google.com/search?q=weather" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Notes', icon: '📝', content: '<textarea style="width:100%;height:100%;font-size:16px;border:none;padding:10px;box-sizing:border-box;"></textarea>' },
+            { name: 'Calendar', icon: '📅', content: '<iframe src="https://calendar.google.com/calendar/r/month" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Maps', icon: '🗺️', content: '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.952912260219!2d3.375295414770757!3d6.527631695278475!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b2ae68280c1%3A0x52c286ea35958316!2sLagos!5e0!3m2!1sen!2sng!4v1567723392506!5m2!1sen!2sng" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Clock', icon: '⏰', content: '<div id="live-clock" style="font-size: 5em; text-align:center; padding-top: 50px;"></div>' },
+            { name: 'Music', icon: '🎵', content: '<p>Music player UI. Actual playback requires audio files.</p><input type="file" accept="audio/*" />' },
+            { name: 'Photos', icon: '🖼️', content: '<h3>Your Photos</h3><p>Captured photos will appear here.</p><div id="gallery"></div>' },
+            { name: 'Mail', icon: '✉️', content: '<h3>Mail Client</h3><p>This is a conceptual mail client.</p>' },
+            { name: 'Stocks', icon: '📈', content: '<iframe src="https://www.google.com/finance" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'News', icon: '📰', content: '<iframe src="https://news.google.com/" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Books', icon: '📚', content: '<h3>iBooks Clone</h3><p>Your digital library.</p>' },
+            { name: 'Podcasts', icon: '🎙️', content: '<h3>Podcasts</h3><p>Listen to your favorite shows.</p>' },
+            { name: 'Health', icon: '❤️', content: '<h3>Health Dashboard</h3><p>Track your activity.</p>' },
+            { name: 'Home', icon: '🏠', content: '<h3>Home Automation</h3><p>Control your smart devices.</p>' },
+            { name: 'Wallet', icon: '💳', content: '<h3>Wallet</h3><p>Your cards and passes.</p>' },
+            { name: 'Translate', icon: '🗣️', content: '<iframe src="https://translate.google.com/" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Compass', icon: '🧭', content: '<h3>Compass</h3><p>Device orientation needed.</p>' },
+            { name: 'Voice Memos', icon: '🎤', content: '<h3>Voice Memos</h3><button>Record</button>' },
+            { name: 'Contacts', icon: '👤', content: '<h3>Contacts</h3><p>Your address book.</p>' },
+            { name: 'Files', icon: '📁', content: '<h3>Files</h3><p>Browse your documents.</p>' },
+            { name: 'Find My', icon: '📍', content: '<h3>Find My</h3><p>Locate your devices.</p>' },
+            { name: 'Shortcuts', icon: '⚡', content: '<h3>Shortcuts</h3><p>Automate your tasks.</p>' },
+            { name: 'Watch', icon: '⌚', content: '<h3>Watch</h3><p>Manage your Apple Watch.</p>' },
+            { name: 'TV', icon: '📺', content: '<h3>TV App</h3><p>Watch shows and movies.</p>' },
+            { name: 'Game Center', icon: '🎮', content: '<h3>Game Center</h3><p>Play with friends.</p>' },
+            { name: 'Paint', icon: '🎨', content: '<canvas id="paint-canvas" style="width:100%;height:100%;background:white;"></canvas>' },
+            { name: 'Terminal', icon: '🧑‍💻', content: '<div id="terminal" style="background:black;color:lime;height:100%;padding:5px;font-family:monospace;">PwaOS [Version 1.0.0]<br>(c) 2025 PwaOS Corporation. All rights reserved.<br><br>> </div>' },
+            { name: 'Code Editor', icon: ' </>', content: '<textarea style="width:100%;height:100%;font-family:monospace;background:#2d2d2d;color:white;border:none;"></textarea>' },
+            { name: 'Chess', icon: '♟️', content: '<iframe src="https://www.google.com/search?q=chess" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Solitaire', icon: '♠️', content: '<iframe src="https://www.google.com/search?q=solitaire" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Minesweeper', icon: '💣', content: '<iframe src="https://www.google.com/search?q=minesweeper" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Snake', icon: '🐍', content: '<iframe src="https://www.google.com/search?q=snake+game" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Tetris', icon: '🧱', content: '<iframe src="https://www.google.com/search?q=tetris" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Sudoku', icon: '🔢', content: '<iframe src="https://www.google.com/search?q=sudoku" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Tic-Tac-Toe', icon: '⭕', content: '<iframe src="https://www.google.com/search?q=tic-tac-toe" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Pac-Man', icon: '👻', content: '<iframe src="https://www.google.com/search?q=pac-man" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Space Invaders', icon: '👾', content: '<iframe src="https://www.google.com/search?q=space+invaders" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Pong', icon: '🏓', content: '<iframe src="https://www.google.com/search?q=pong+game" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Flappy Bird', icon: '🐦', content: '<iframe src="https://www.google.com/search?q=flappy+bird" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: '2048', icon: '🔢', content: '<iframe src="https://play2048.co/" style="height:100%;width:100%;border:none;"></iframe>' },
+            { name: 'Drums', icon: '🥁', content: '<h3>Drum Kit</h3><p>Tap to play sounds.</p>' },
+            { name: 'Piano', icon: '🎹', content: '<h3>Piano</h3><p>Play some tunes.</p>' },
+            { name: 'Whiteboard', icon: '⬜', content: '<canvas style="width:100%;height:100%;background:white;border:1px solid black;"></canvas>' },
+            { name: 'Unit Converter', icon: '🔄', content: '<h3>Unit Converter</h3><p>Convert units.</p>' },
+            { name: 'Tip Calculator', icon: '💵', content: '<h3>Tip Calculator</h3>' },
+            { name: 'Stopwatch', icon: '⏱️', content: '<h3>Stopwatch</h3>' },
+            { name: 'Timer', icon: '⏲️', content: '<h3>Timer</h3>' },
+            { name: 'Password Gen', icon: '🔑', content: '<h3>Password Generator</h3>' },
+            { name: 'QR Scanner', icon: '📷', content: '<h3>QR Code Scanner</h3><p>Uses camera.</p>' },
+        ];
+        
+        let userApps = JSON.parse(localStorage.getItem('pwaos_user_apps')) || [];
+        let allApps = [...preinstalledApps, ...userApps];
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            timeEl.textContent = `${hours}:${minutes}`;
+            
+            const liveClock = document.getElementById('live-clock');
+            if(liveClock && document.getElementById('generic-app-window').classList.contains('active')) {
+                liveClock.textContent = `${hours}:${minutes}:${String(now.getSeconds()).padStart(2, '0')}`;
+            }
+        }
+
+        function renderApps() {
+            homeScreen.innerHTML = '';
+            pageIndicator.innerHTML = '';
+            allApps = [...preinstalledApps, ...userApps];
+            const appsPerPage = 16;
+            const pageCount = Math.ceil(allApps.length / appsPerPage);
+
+            for (let i = 0; i < pageCount; i++) {
+                const page = document.createElement('div');
+                page.className = 'page';
+                homeScreen.appendChild(page);
+
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i === currentPage) dot.classList.add('active');
+                pageIndicator.appendChild(dot);
+            }
+
+            allApps.forEach((app, index) => {
+                const pageIndex = Math.floor(index / appsPerPage);
+                const page = homeScreen.children[pageIndex];
+                
+                const appIcon = document.createElement('a');
+                appIcon.href = '#';
+                appIcon.className = 'app-icon';
+                appIcon.dataset.app = app.name;
+                appIcon.innerHTML = `
+                    <div class="icon">${app.icon}</div>
+                    <div class="label">${app.name}</div>
+                `;
+                page.appendChild(appIcon);
+            });
+            
+            addAppClickListeners();
+        }
+
+        function openApp(appName) {
+            const appData = allApps.find(app => app.name === appName);
+            if (!appData) return;
+
+            const genericWindow = document.getElementById('generic-app-window');
+            const genericTitle = document.getElementById('generic-app-title');
+            const genericContent = document.getElementById('generic-app-content');
+
+            genericTitle.textContent = appData.name;
+            genericContent.innerHTML = appData.content;
+            genericWindow.classList.add('active');
+            
+            if (appName === 'Paint') {
+                setupPaintCanvas();
+            }
+        }
+        
+        function setupPaintCanvas() {
+            const canvas = document.getElementById('paint-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let painting = false;
+
+            function startPosition(e) {
+                painting = true;
+                draw(e);
+            }
+            function endPosition() {
+                painting = false;
+                ctx.beginPath();
+            }
+            function draw(e) {
+                if (!painting) return;
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = 'black';
+
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+
+            canvas.addEventListener('mousedown', startPosition);
+            canvas.addEventListener('mouseup', endPosition);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchstart', startPosition);
+            canvas.addEventListener('touchend', endPosition);
+            canvas.addEventListener('touchmove', draw);
+        }
+
+        function closeApp() {
+            const windows = document.querySelectorAll('.app-window');
+            windows.forEach(win => win.classList.remove('active'));
+            stopCamera();
+        }
+
+        function addAppClickListeners() {
+            document.querySelectorAll('.app-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const appName = icon.dataset.app;
+                    
+                    const specialApps = ['browser', 'camera', 'app-installer', 'settings'];
+                    if (specialApps.includes(appName)) {
+                        document.getElementById(`${appName}-window`).classList.add('active');
+                        if (appName === 'camera') {
+                            startCamera();
+                        }
+                    } else {
+                        openApp(appName);
+                    }
+                });
+            });
+        }
+        
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', closeApp);
+        });
+        
+        // Browser App
+        const goBtn = document.getElementById('go-btn');
+        const urlBar = document.getElementById('url-bar');
+        const browserFrame = document.getElementById('browser-frame');
+        goBtn.addEventListener('click', () => {
+            let url = urlBar.value.trim();
+            if (!url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+            // Using a CORS proxy for cross-origin sites. This is a public proxy.
+            browserFrame.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        });
+
+        // Camera App
+        const video = document.getElementById('camera-view');
+        let stream;
+        async function startCamera() {
+            try {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                alert("Could not access the camera. Please ensure permissions are granted.");
+            }
+        }
+        function stopCamera() {
+             if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+             }
+        }
+        document.getElementById('capture-btn').addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const dataUrl = canvas.toDataURL('image/png');
+            const gallery = document.getElementById('gallery');
+            if(gallery) {
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.style.width = '100px';
+                img.style.margin = '5px';
+                gallery.appendChild(img);
+            }
+            alert('Photo captured! Check the Photos app.');
+        });
+
+        // App Installer
+        document.getElementById('install-from-url-btn').addEventListener('click', () => {
+            const url = document.getElementById('install-url').value.trim();
+            const name = document.getElementById('install-name-url').value.trim();
+            if (url && name) {
+                const newApp = {
+                    name: name,
+                    icon: name.charAt(0).toUpperCase(),
+                    content: `<iframe src="${url}" style="height:100%;width:100%;border:none;"></iframe>`
+                };
+                userApps.push(newApp);
+                localStorage.setItem('pwaos_user_apps', JSON.stringify(userApps));
+                renderApps();
+                closeApp();
+            }
+        });
+        document.getElementById('install-from-html-btn').addEventListener('click', () => {
+            const html = document.getElementById('install-html').value;
+            const name = document.getElementById('install-name-html').value.trim();
+            if (html && name) {
+                const newApp = {
+                    name: name,
+                    icon: name.charAt(0).toUpperCase(),
+                    content: html
+                };
+                userApps.push(newApp);
+                localStorage.setItem('pwaos_user_apps', JSON.stringify(userApps));
+                renderApps();
+                closeApp();
+            }
+        });
+
+        // Settings
+        document.getElementById('change-wallpaper-btn').addEventListener('click', () => {
+            const url = document.getElementById('wallpaper-url').value.trim();
+            if (url) {
+                osContainer.style.backgroundImage = `url('${url}')`;
+                localStorage.setItem('pwaos_wallpaper', url);
+            }
+        });
+
+        document.getElementById('reset-os-btn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset everything? This will delete all installed apps and settings.')) {
+                localStorage.removeItem('pwaos_user_apps');
+                localStorage.removeItem('pwaos_wallpaper');
+                userApps = [];
+                osContainer.style.backgroundImage = `var(--background-image)`;
+                renderApps();
+                closeApp();
+            }
+        });
+
+        // Home screen swipe
+        function handleSwipe(e) {
+            if (!isDragging) return;
+            const currentX = e.touches[0].clientX;
+            const diffX = startX - currentX;
+            homeScreen.style.transition = 'none';
+            homeScreen.style.transform = `translateX(${-currentPage * window.innerWidth - diffX}px)`;
+        }
+        
+        homeScreen.addEventListener('touchstart', (e) => {
+            // Prevent swipe if inside an app window
+            if (document.querySelector('.app-window.active')) return;
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        homeScreen.addEventListener('touchmove', handleSwipe);
+
+        homeScreen.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            const endX = e.changedTouches[0].clientX;
+            const diffX = startX - endX;
+            
+            homeScreen.style.transition = 'transform 0.3s ease-in-out';
+
+            if (Math.abs(diffX) > 50) { // Swipe threshold
+                if (diffX > 0 && currentPage < homeScreen.children.length - 1) {
+                    currentPage++;
+                } else if (diffX < 0 && currentPage > 0) {
+                    currentPage--;
+                }
+            }
+            
+            homeScreen.style.transform = `translateX(-${currentPage * 100}%)`;
+            updatePageIndicator();
+        });
+        
+        function updatePageIndicator() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentPage);
+            });
+        }
+
+        function loadSettings() {
+            const savedWallpaper = localStorage.getItem('pwaos_wallpaper');
+            if (savedWallpaper) {
+                osContainer.style.backgroundImage = `url('${savedWallpaper}')`;
+            }
+        }
+
+        // Initial setup
+        updateClock();
+        setInterval(updateClock, 1000);
+        loadSettings();
+        renderApps();
+        updatePageIndicator();
+        window.addEventListener('resize', () => {
+            homeScreen.style.transition = 'none';
+            homeScreen.style.transform = `translateX(-${currentPage * 100}%)`;
+        });
+    });
+
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker registered', reg))
+        .catch(err => console.log('Service Worker not registered', err));
+    }
+</script>
+<!-- The Service Worker should be in a separate file `sw.js` for PWA functionality.
+     For this single-file requirement, we'll embed it. This is not standard but works for a demo. -->
+<script id="sw">
+    const cacheName = 'pwaos-v1';
+    const assetsToCache = [
+        '/', // This will cache the main HTML file
+        // Since everything is inline, we only need to cache the root.
+    ];
+
+    self.addEventListener('install', event => {
+        event.waitUntil(
+            caches.open(cacheName).then(cache => {
+                return cache.addAll(assetsToCache);
+            })
+        );
+    });
+
+    self.addEventListener('fetch', event => {
+        event.respondWith(
+            caches.match(event.request).then(response => {
+                return response || fetch(event.request);
+            })
+        );
+    });
+</script>
+<script>
+    // Create a blob from the service worker script content
+    const swScript = document.getElementById('sw').textContent;
+    const swBlob = new Blob([swScript], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(swBlob);
+
+    // Register the service worker from the blob URL
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register(swUrl)
+        .then(reg => console.log('Service Worker registered from Blob', reg))
+        .catch(err => console.log('Service Worker not registered from Blob', err));
+    }
+</script>
+
+</body>
+</html>
