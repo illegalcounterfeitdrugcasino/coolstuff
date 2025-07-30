@@ -3,710 +3,1958 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AltOS</title>
+    <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="PwaOS">
-    <link rel="apple-touch-icon" href="https://placehold.co/180x180/000000/ffffff?text=OS">
-    <title>PwaOS</title>
+    <meta name="apple-mobile-web-app-title" content="AltOS">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiMxYTFhMmUiLz4KPHN2ZyB4PSI0NSIgeT0iNDUiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmZmIj4KPHA+dGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJ6Ii8+Cjwvc3ZnPgo8L3N2Zz4=">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQWx0T1MiLCJzaG9ydF9uYW1lIjoiQWx0T1MiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzFhMWEyZSIsInRoZW1lX2NvbG9yIjoiIzFhMWEyZSIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUIzYVdSMGFEMGlNVGd3SWlCb1pXbG5hSFE5SWpFNE1DSWlJSFpwWlhkQ2IzZzlJakFnTUNBeE9EQWdNVGd3SWlCbWFXeHNQU0p1YjI1bElpQjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaVBnbzhjbVZqZENCM2FXUjBhRDBpTVRnd0lpQm9aV2xuYUhROUlqRTRNQ0lpSUhKNFBTSTBNQ0lpSUdacGJHdzlJaU14WVRGaE1tVWlMejRLUEhOMlp5QjRQU0kxUFNJZ2VUMGlORFVpSUhkcFpIUm9QU0k1TUNJS0lHaGxhV2RvZEQwaU9UQWlJSFpwWlhkQ2IzZzlJakFnTUNBeU5DQXlOQ0lpSUdacGJHdzlJaU5tWm1ZaVBnbzhjRzlzZVdkdmJpQndiMmx1ZEhNOUlrMHhNaUF5VERFekxqQTVJRGd1TWpaTU1qQWdPVXd4TXk0d09TQXhOUzQzTkV3eE1pQXlNa3d4TUM0NU1TQXhOUzQzTkV3MElEbE1NVEF1T1RFZ09DNHlOa3d4TWlBeWVpSXZQZ280TDNOMlp6NEtQQzl6ZG1jKyIsInNpemVzIjoiMTgweD18IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+    
     <style>
-        :root {
-            --background-image: url('https://source.unsplash.com/random/1080x1920?nature,water');
-            --font-color: #ffffff;
-            --dock-bg: rgba(0, 0, 0, 0.3);
-            --app-icon-label-bg: rgba(0, 0, 0, 0.2);
-        }
-        body, html {
+        * {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: var(--font-color);
+            height: 100vh;
+            user-select: none;
         }
-        #os-container {
-            width: 100%;
-            height: 100%;
-            background: var(--background-image) no-repeat center center/cover;
-            position: relative;
-        }
-        #status-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+
+        /* Status Bar */
+        .status-bar {
             height: 30px;
+            background: rgba(0,0,0,0.3);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 15px;
-            box-sizing: border-box;
-            background: rgba(0,0,0,0.2);
+            font-size: 12px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
-            font-size: 14px;
+            backdrop-filter: blur(10px);
         }
-        #home-screen {
-            width: 100%;
+
+        /* Home Screen */
+        .home-screen {
+            padding: 40px 20px 100px;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .home-pages {
+            display: flex;
+            transition: transform 0.3s ease;
             height: 100%;
+        }
+
+        .home-page {
+            min-width: 100vw;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 20px;
+            padding: 20px;
+            align-content: start;
+        }
+
+        .app-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-icon:active {
+            transform: scale(0.95);
+        }
+
+        .app-icon::after {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
-            display: flex;
-            transition: transform 0.3s ease-in-out;
+            right: 0;
+            height: 30%;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px 15px 50% 50%;
         }
-        .page {
-            min-width: 100%;
-            height: 100%;
-            padding: 40px 20px 100px 20px;
-            box-sizing: border-box;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-auto-rows: 90px;
-            gap: 15px;
-            align-content: flex-start;
-        }
-        .app-icon {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+
+        .app-label {
             text-align: center;
-            text-decoration: none;
-            color: var(--font-color);
+            font-size: 11px;
+            margin-top: 5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
-        .app-icon .icon {
-            width: 60px;
-            height: 60px;
-            background-color: var(--app-icon-label-bg);
-            border-radius: 15px;
+
+        /* Page Dots */
+        .page-dots {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: background 0.3s ease;
+        }
+
+        .dot.active {
+            background: rgba(255,255,255,0.8);
+        }
+
+        /* Dock */
+        .dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.1);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            margin-bottom: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            gap: 20px;
         }
-        .app-icon .label {
-            font-size: 12px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
+
+        .dock .app-icon {
+            width: 55px;
+            height: 55px;
         }
-        #dock {
-            position: absolute;
-            bottom: 10px;
-            left: 5%;
-            width: 90%;
-            height: 80px;
-            background: var(--dock-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0 10px;
-            box-sizing: border-box;
-        }
+
+        /* App Window */
         .app-window {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: #f0f0f0;
-            color: #000;
-            z-index: 2000;
+            right: 0;
+            bottom: 0;
+            background: #1a1a2e;
+            z-index: 999;
             display: none;
             flex-direction: column;
-            transform: scale(1.1);
-            opacity: 0;
-            transition: transform 0.3s, opacity 0.3s;
         }
+
         .app-window.active {
             display: flex;
-            transform: scale(1);
-            opacity: 1;
+            animation: slideUp 0.3s ease;
         }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
         .app-header {
-            width: 100%;
-            height: 44px;
-            background: #e9e9e9;
+            height: 60px;
+            background: rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
-            padding: 0 10px;
-            box-sizing: border-box;
-            flex-shrink: 0;
+            padding: 0 20px;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .close-btn {
-            background: #ff5f56;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 1px solid #e0443e;
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #007AFF;
+            font-size: 16px;
             cursor: pointer;
+            padding: 10px;
+            margin: -10px;
         }
+
+        .app-title {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+        }
+
         .app-content {
-            flex-grow: 1;
+            flex: 1;
             overflow: auto;
-            padding: 15px;
+            padding: 20px;
         }
-        iframe {
+
+        /* Browser App */
+        .browser-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .browser-bar input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            outline: none;
+        }
+
+        .browser-bar input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .browser-frame {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            height: calc(100vh - 160px);
+        }
+
+        .browser-frame iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
-        #page-indicator {
-            position: absolute;
-            bottom: 100px;
+
+        /* Camera App */
+        .camera-container {
+            position: relative;
             width: 100%;
-            text-align: center;
+            height: calc(100vh - 100px);
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
         }
-        .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            margin: 0 4px;
-            transition: background 0.3s;
-        }
-        .dot.active {
-            background: white;
-        }
-        #camera-view {
+
+        .camera-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        #capture-btn {
+
+        .camera-controls {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .capture-btn {
             width: 70px;
             height: 70px;
             border-radius: 50%;
             background: white;
-            border: 5px solid rgba(0,0,0,0.3);
+            border: 3px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .capture-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Settings App */
+        .settings-list {
+            list-style: none;
+        }
+
+        .settings-item {
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-item:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* Calculator */
+        .calculator {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .calc-display {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            text-align: right;
+            font-size: 32px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            height: 60px;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .calc-btn:active {
+            transform: scale(0.95);
+        }
+
+        .calc-btn.operator {
+            background: #007AFF;
+        }
+
+        .calc-btn.zero {
+            grid-column: span 2;
+        }
+
+        /* Notes App */
+        .notes-container {
+            height: calc(100vh - 120px);
+        }
+
+        .notes-textarea {
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+        }
+
+        .notes-textarea::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Clock */
+        .clock-display {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .time {
+            font-size: 72px;
+            font-weight: 200;
+            margin-bottom: 10px;
+            font-family: 'SF Mono', monospace;
+        }
+
+        .date {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+        /* Weather */
+        .weather-card {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .weather-temp {
+            font-size: 64px;
+            font-weight: 200;
+            margin: 20px 0;
+        }
+
+        .weather-desc {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* Music Player */
+        .music-player {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .album-art {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 20px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .track-info {
+            margin-bottom: 30px;
+        }
+
+        .track-title {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .track-artist {
+            opacity: 0.7;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .control-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .control-btn.play {
+            width: 70px;
+            height: 70px;
+            font-size: 24px;
+            background: #007AFF;
+        }
+
+        /* Games */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+
+        .game-cell {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            font-size: 32px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .game-cell:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .game-status {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        /* Mail */
+        .mail-list {
+            list-style: none;
+        }
+
+        .mail-item {
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        .mail-sender {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .mail-subject {
+            margin-bottom: 5px;
+        }
+
+        .mail-preview {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        /* Photos */
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+        }
+
+        .photo-item {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-item::after {
+            content: '📷';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+        }
+
+        /* Map */
+        .map-container {
+            background: linear-gradient(45deg, #2d3748, #4a5568);
+            height: calc(100vh - 120px);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* App Store */
+        .app-store-list {
+            list-style: none;
+        }
+
+        .store-app {
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .store-app-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .store-app-info {
+            flex: 1;
+        }
+
+        .store-app-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .store-app-desc {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        .install-btn {
+            background: #007AFF;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Add App Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        .modal-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .modal-btn.primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* Files App */
+        .files-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .files-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .files-list {
+            list-style: none;
+        }
+
+        .file-item {
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .home-page {
+                grid-template-columns: repeat(4, 1fr);
+                grid-gap: 15px;
+                padding: 15px;
+            }
+            
+            .app-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .dock .app-icon {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
 <body>
-
-<div id="os-container">
-    <div id="status-bar">
-        <span id="time"></span>
-        <span> PwaOS </span>
-        <span>
-            <span id="wifi-icon">📶</span>
-            <span id="battery-level">100%</span> 🔋
-        </span>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span id="carrier">AltOS</span>
+            <span id="wifi">📶</span>
+        </div>
+        <div class="status-center" id="time"></div>
+        <div class="status-right">
+            <span id="battery">🔋 100%</span>
+        </div>
     </div>
 
-    <div id="home-screen">
-        <!-- Pages will be generated by JS -->
+    <!-- Home Screen -->
+    <div class="home-screen" id="homeScreen">
+        <div class="home-pages" id="homePages">
+            <!-- Page 1 -->
+            <div class="home-page">
+                <div class="app-container" onclick="openApp('browser')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #4285f4, #34a853);">🌐</div>
+                    <div class="app-label">Browser</div>
+                </div>
+                <div class="app-container" onclick="openApp('camera')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #333, #666);">📷</div>
+                    <div class="app-label">Camera</div>
+                </div>
+                <div class="app-container" onclick="openApp('settings')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #8e8e93, #636366);">⚙️</div>
+                    <div class="app-label">Settings</div>
+                </div>
+                <div class="app-container" onclick="openApp('calculator')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #ff6b35, #f7931e);">🧮</div>
+                    <div class="app-label">Calculator</div>
+                </div>
+                <div class="app-container" onclick="openApp('notes')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #ffcc02, #ffb700);">📝</div>
+                    <div class="app-label">Notes</div>
+                </div>
+                <div class="app-container" onclick="openApp('clock')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #000, #333);">🕐</div>
+                    <div class="app-label">Clock</div>
+                </div>
+                <div class="app-container" onclick="openApp('weather')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #74b9ff, #0984e3);">🌤️</div>
+                    <div class="app-label">Weather</div>
+                </div>
+                <div class="app-container" onclick="openApp('music')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #fd79a8, #e84393);">🎵</div>
+                    <div class="app-label">Music</div>
+                </div>
+            </div>
+            
+            <!-- Page 2 -->
+            <div class="home-page">
+                <div class="app-container" onclick="openApp('games')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #00b894, #00a085);">🎮</div>
+                    <div class="app-label">Games</div>
+                </div>
+                <div class="app-container" onclick="openApp('mail')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #0984e3, #74b9ff);">📧</div>
+                    <div class="app-label">Mail</div>
+                </div>
+                <div class="app-container" onclick="openApp('photos')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #fd79a8, #fdcb6e);">📱</div>
+                    <div class="app-label">Photos</div>
+                </div>
+                <div class="app-container" onclick="openApp('maps')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #00b894, #55a3ff);">🗺️</div>
+                    <div class="app-label">Maps</div>
+                </div>
+                <div class="app-container" onclick="openApp('appstore')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #0984e3, #74b9ff);">📦</div>
+                    <div class="app-label">App Store</div>
+                </div>
+                <div class="app-container" onclick="openApp('files')">
+                    <div class="app-icon" style="background: linear-gradient(45deg, #6c5ce7, #a29bfe);">📁</div>
+                    <div class="app-label">Files</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page Dots -->
+        <div class="page-dots" id="pageDots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+        </div>
     </div>
 
-    <div id="page-indicator">
-        <!-- Dots will be generated by JS -->
-    </div>
-
-    <div id="dock">
-        <a href="#" class="app-icon" data-app="browser">
-            <div class="icon">🌐</div>
-            <div class="label">Browser</div>
-        </a>
-        <a href="#" class="app-icon" data-app="camera">
-            <div class="icon">📷</div>
-            <div class="label">Camera</div>
-        </a>
-        <a href="#" class="app-icon" data-app="app-installer">
-            <div class="icon">➕</div>
-            <div class="label">Install</div>
-        </a>
-        <a href="#" class="app-icon" data-app="settings">
-            <div class="icon">⚙️</div>
-            <div class="label">Settings</div>
-        </a>
+    <!-- Dock -->
+    <div class="dock">
+        <div class="app-icon" onclick="openApp('phone')" style="background: linear-gradient(45deg, #00d2d3, #54a0ff);">📞</div>
+        <div class="app-icon" onclick="openApp('messages')" style="background: linear-gradient(45deg, #00d2d3, #54a0ff);">💬</div>
+        <div class="app-icon" onclick="openApp('browser')" style="background: linear-gradient(45deg, #4285f4, #34a853);">🌐</div>
+        <div class="app-icon" onclick="openApp('music')" style="background: linear-gradient(45deg, #fd79a8, #e84393);">🎵</div>
     </div>
 
     <!-- App Windows -->
-    <div id="browser-window" class="app-window">
+    <div class="app-window" id="browserApp">
         <div class="app-header">
-            <div class="close-btn"></div>
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Browser</div>
+            <div></div>
         </div>
-        <div class="app-content" style="padding:0; display: flex; flex-direction: column;">
-            <div style="padding: 5px; background: #ddd; display: flex;">
-                <input type="text" id="url-bar" placeholder="https://example.com" style="flex-grow: 1; padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
-                <button id="go-btn" style="margin-left: 5px; padding: 5px 10px; border-radius: 5px; border: none; background: #4CAF50; color: white;">Go</button>
+        <div class="app-content">
+            <div class="browser-bar">
+                <span>🔒</span>
+                <input type="url" id="urlInput" placeholder="Enter URL or search..." onkeypress="handleUrlInput(event)">
+                <button onclick="navigateTo()">Go</button>
             </div>
-            <iframe id="browser-frame"></iframe>
+            <div class="browser-frame">
+                <iframe id="browserFrame" src="about:blank"></iframe>
+            </div>
         </div>
     </div>
 
-    <div id="camera-window" class="app-window">
+    <div class="app-window" id="cameraApp">
         <div class="app-header">
-            <div class="close-btn"></div>
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Camera</div>
+            <div></div>
         </div>
-        <div class="app-content" style="padding:0; background: black; position: relative;">
-            <video id="camera-view" autoplay playsinline></video>
-            <button id="capture-btn"></button>
-        </div>
-    </div>
-    
-    <div id="app-installer-window" class="app-window">
-        <div class="app-header"><div class="close-btn"></div></div>
         <div class="app-content">
-            <h3>Install New App</h3>
-            <p>Install from URL:</p>
-            <input type="text" id="install-url" placeholder="App URL" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
-            <input type="text" id="install-name-url" placeholder="App Name" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
-            <button id="install-from-url-btn" style="padding: 10px 15px;">Install</button>
-            <hr style="margin: 20px 0;">
-            <p>Install from Custom HTML:</p>
-            <input type="text" id="install-name-html" placeholder="App Name" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
-            <textarea id="install-html" placeholder="<p>Hello World</p>" style="width: calc(100% - 20px); height: 150px; padding: 10px; margin-bottom: 10px;"></textarea>
-            <button id="install-from-html-btn" style="padding: 10px 15px;">Install</button>
+            <div class="camera-container">
+                <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
+                <div class="camera-controls">
+                    <div class="capture-btn" id="captureBtn" onclick="capturePhoto()"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="settings-window" class="app-window">
-        <div class="app-header"><div class="close-btn"></div></div>
-        <div class="app-content">
-            <h3>Settings</h3>
-            <p>Change Wallpaper:</p>
-            <input type="text" id="wallpaper-url" placeholder="Image URL" style="width: calc(100% - 20px); padding: 10px; margin-bottom: 10px;">
-            <button id="change-wallpaper-btn" style="padding: 10px 15px;">Set</button>
-             <hr style="margin: 20px 0;">
-            <p>Reset PwaOS:</p>
-            <button id="reset-os-btn" style="padding: 10px 15px; background-color: #ff5f56; color: white;">Reset All Data</button>
-        </div>
-    </div>
-
-    <!-- Generic App Window for installed apps -->
-    <div id="generic-app-window" class="app-window">
+    <div class="app-window" id="settingsApp">
         <div class="app-header">
-            <div class="close-btn"></div>
-            <span id="generic-app-title" style="margin-left: 10px; font-weight: bold;"></span>
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Settings</div>
+            <div></div>
         </div>
-        <div id="generic-app-content" class="app-content" style="padding:0;"></div>
+        <div class="app-content">
+            <ul class="settings-list">
+                <li class="settings-item" onclick="toggleTheme()">
+                    <span>🌙 Dark Mode</span>
+                    <span id="themeToggle">On</span>
+                </li>
+                <li class="settings-item" onclick="showNotification('WiFi settings opened')">
+                    <span>📶 WiFi</span>
+                    <span>Connected</span>
+                </li>
+                <li class="settings-item" onclick="showNotification('Bluetooth settings opened')">
+                    <span>📘 Bluetooth</span>
+                    <span>Off</span>
+                </li>
+                <li class="settings-item" onclick="showNotification('Privacy settings opened')">
+                    <span>🔒 Privacy</span>
+                    <span></span>
+                </li>
+                <li class="settings-item" onclick="showNotification('Storage: 32GB used of 64GB')">
+                    <span>💾 Storage</span>
+                    <span>32GB</span>
+                </li>
+                <li class="settings-item" onclick="showNotification('Battery health: 94%')">
+                    <span>🔋 Battery</span>
+                    <span>94%</span>
+                </li>
+                <li class="settings-item" onclick="showNotification('AltOS v1.0.0')">
+                    <span>ℹ️ About</span>
+                    <span>v1.0.0</span>
+                </li>
+            </ul>
+        </div>
     </div>
 
-</div>
+    <div class="app-window" id="calculatorApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Calculator</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="calculator">
+                <div class="calc-display" id="calcDisplay">0</div>
+                <div class="calc-buttons">
+                    <button class="calc-btn" onclick="clearCalc()">C</button>
+                    <button class="calc-btn" onclick="calcInput('±')">±</button>
+                    <button class="calc-btn" onclick="calcInput('%')">%</button>
+                    <button class="calc-btn operator" onclick="calcInput('/')">÷</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="calcInput('9')">9</button>
+                    <button class="calc-btn operator" onclick="calcInput('*')">×</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn operator" onclick="calcInput('-')">−</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="calcInput('3')">3</button>
+                    <button class="calc-btn operator" onclick="calcInput('+')">+</button>
+                    
+                    <button class="calc-btn zero" onclick="calcInput('0')">0</button>
+                    <button class="calc-btn" onclick="calcInput('.')">.</button>
+                    <button class="calc-btn operator" onclick="calculate()">=</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const osContainer = document.getElementById('os-container');
-        const timeEl = document.getElementById('time');
-        const homeScreen = document.getElementById('home-screen');
-        const pageIndicator = document.getElementById('page-indicator');
+    <div class="app-window" id="notesApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Notes</div>
+            <button onclick="saveNotes()" style="background:none;border:none;color:#007AFF;cursor:pointer;">Save</button>
+        </div>
+        <div class="app-content">
+            <div class="notes-container">
+                <textarea class="notes-textarea" id="notesText" placeholder="Start typing your notes..."></textarea>
+            </div>
+        </div>
+    </div>
 
+    <div class="app-window" id="clockApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Clock</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="clock-display">
+                <div class="time" id="clockTime"></div>
+                <div class="date" id="clockDate"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-window" id="weatherApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Weather</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="weather-card">
+                <div class="weather-location">Kurttila, Finland</div>
+                <div class="weather-temp">22°</div>
+                <div class="weather-desc">Partly Cloudy</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px;">
+                <h3 style="margin-bottom: 15px;">7-Day Forecast</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Today</span>
+                    <span>🌤️</span>
+                    <span>22° / 15°</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Tomorrow</span>
+                    <span>☀️</span>
+                    <span>25° / 18°</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Friday</span>
+                    <span>🌧️</span>
+                    <span>19° / 12°</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-window" id="musicApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Music</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="music-player">
+                <div class="album-art">🎵</div>
+                <div class="track-info">
+                    <div class="track-title" id="trackTitle">Ambient Sounds</div>
+                    <div class="track-artist" id="trackArtist">AltOS Player</div>
+                </div>
+                <div class="player-controls">
+                    <button class="control-btn" onclick="previousTrack()">⏮️</button>
+                    <button class="control-btn play" id="playBtn" onclick="togglePlay()">⏸️</button>
+                    <button class="control-btn" onclick="nextTrack()">⏭️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-window" id="gamesApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Games</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="game-status" id="gameStatus">Tic Tac Toe - Your Turn</div>
+            <div class="game-grid" id="gameGrid">
+                <button class="game-cell" onclick="makeMove(0)"></button>
+                <button class="game-cell" onclick="makeMove(1)"></button>
+                <button class="game-cell" onclick="makeMove(2)"></button>
+                <button class="game-cell" onclick="makeMove(3)"></button>
+                <button class="game-cell" onclick="makeMove(4)"></button>
+                <button class="game-cell" onclick="makeMove(5)"></button>
+                <button class="game-cell" onclick="makeMove(6)"></button>
+                <button class="game-cell" onclick="makeMove(7)"></button>
+                <button class="game-cell" onclick="makeMove(8)"></button>
+            </div>
+            <button onclick="resetGame()" style="background:#007AFF;border:none;border-radius:10px;padding:10px 20px;color:white;cursor:pointer;margin-top:20px;">New Game</button>
+        </div>
+    </div>
+
+    <div class="app-window" id="mailApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Mail</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <ul class="mail-list">
+                <li class="mail-item">
+                    <div class="mail-sender">AltOS Team</div>
+                    <div class="mail-subject">Welcome to AltOS!</div>
+                    <div class="mail-preview">Thank you for trying our alternative operating system...</div>
+                </li>
+                <li class="mail-item">
+                    <div class="mail-sender">System Updates</div>
+                    <div class="mail-subject">Security Update Available</div>
+                    <div class="mail-preview">A new security update is ready for installation...</div>
+                </li>
+                <li class="mail-item">
+                    <div class="mail-sender">App Store</div>
+                    <div class="mail-subject">New Apps This Week</div>
+                    <div class="mail-preview">Discover amazing new applications...</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="app-window" id="photosApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Photos</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="photos-grid" id="photosGrid">
+                <!-- Photos will be added dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div class="app-window" id="mapsApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Maps</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="map-container">
+                <div style="font-size: 48px; margin-bottom: 20px;">🗺️</div>
+                <div style="text-align: center;">
+                    <h3>Current Location</h3>
+                    <p>Kurttila, Uusimaa, Finland</p>
+                    <button onclick="showNotification('Getting directions...')" style="background:#007AFF;border:none;border-radius:10px;padding:10px 20px;color:white;cursor:pointer;margin-top:15px;">Get Directions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-window" id="appstoreApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">App Store</div>
+            <button onclick="showAddAppModal()" style="background:none;border:none;color:#007AFF;cursor:pointer;">+ Add</button>
+        </div>
+        <div class="app-content">
+            <ul class="app-store-list" id="appStoreList">
+                <li class="store-app">
+                    <div class="store-app-icon">🎨</div>
+                    <div class="store-app-info">
+                        <div class="store-app-name">Paint App</div>
+                        <div class="store-app-desc">Creative drawing application</div>
+                    </div>
+                    <button class="install-btn" onclick="installApp('paint', 'Paint', '🎨')">Install</button>
+                </li>
+                <li class="store-app">
+                    <div class="store-app-icon">📰</div>
+                    <div class="store-app-info">
+                        <div class="store-app-name">News Reader</div>
+                        <div class="store-app-desc">Stay updated with latest news</div>
+                    </div>
+                    <button class="install-btn" onclick="installApp('news', 'News', '📰')">Install</button>
+                </li>
+                <li class="store-app">
+                    <div class="store-app-icon">🏃</div>
+                    <div class="store-app-info">
+                        <div class="store-app-name">Fitness Tracker</div>
+                        <div class="store-app-desc">Track your daily activities</div>
+                    </div>
+                    <button class="install-btn" onclick="installApp('fitness', 'Fitness', '🏃')">Install</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="app-window" id="filesApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Files</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div class="files-toolbar">
+                <button class="files-btn" onclick="showNotification('Creating new folder...')">New Folder</button>
+                <button class="files-btn" onclick="showNotification('Upload functionality coming soon')">Upload</button>
+            </div>
+            <ul class="files-list">
+                <li class="file-item">
+                    <div class="file-icon">📁</div>
+                    <div>
+                        <div>Documents</div>
+                        <small style="opacity:0.7;">3 items</small>
+                    </div>
+                </li>
+                <li class="file-item">
+                    <div class="file-icon">📁</div>
+                    <div>
+                        <div>Downloads</div>
+                        <small style="opacity:0.7;">7 items</small>
+                    </div>
+                </li>
+                <li class="file-item">
+                    <div class="file-icon">📄</div>
+                    <div>
+                        <div>README.txt</div>
+                        <small style="opacity:0.7;">2 KB</small>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="app-window" id="phoneApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Phone</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div style="text-align: center; padding: 40px 0;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📞</div>
+                <h3>Phone</h3>
+                <p style="opacity: 0.7; margin: 20px 0;">Virtual phone functionality</p>
+                <button onclick="showNotification('Dialing...')" style="background:#007AFF;border:none;border-radius:10px;padding:15px 30px;color:white;cursor:pointer;">Make Call</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-window" id="messagesApp">
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">← Back</button>
+            <div class="app-title">Messages</div>
+            <div></div>
+        </div>
+        <div class="app-content">
+            <div style="text-align: center; padding: 40px 0;">
+                <div style="font-size: 64px; margin-bottom: 20px;">💬</div>
+                <h3>Messages</h3>
+                <p style="opacity: 0.7; margin: 20px 0;">No messages yet</p>
+                <button onclick="showNotification('Composing message...')" style="background:#007AFF;border:none;border-radius:10px;padding:15px 30px;color:white;cursor:pointer;">New Message</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add App Modal -->
+    <div class="modal" id="addAppModal">
+        <div class="modal-content">
+            <div class="modal-title">Add Custom App</div>
+            <input type="text" class="modal-input" id="appNameInput" placeholder="App Name">
+            <input type="text" class="modal-input" id="appIconInput" placeholder="App Icon (emoji)">
+            <input type="url" class="modal-input" id="appUrlInput" placeholder="App URL (for iframe apps)">
+            <textarea class="modal-input" id="appCodeInput" placeholder="Or paste custom HTML code..." rows="4"></textarea>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="hideAddAppModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="addCustomApp()">Add App</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
         let currentPage = 0;
-        let startX = 0;
-        let isDragging = false;
-        
-        const preinstalledApps = [
-            { name: 'Calculator', icon: '🧮', content: '<iframe src="https://www.google.com/search?q=calculator" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Weather', icon: '☀️', content: '<iframe src="https://www.google.com/search?q=weather" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Notes', icon: '📝', content: '<textarea style="width:100%;height:100%;font-size:16px;border:none;padding:10px;box-sizing:border-box;"></textarea>' },
-            { name: 'Calendar', icon: '📅', content: '<iframe src="https://calendar.google.com/calendar/r/month" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Maps', icon: '🗺️', content: '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.952912260219!2d3.375295414770757!3d6.527631695278475!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b2ae68280c1%3A0x52c286ea35958316!2sLagos!5e0!3m2!1sen!2sng!4v1567723392506!5m2!1sen!2sng" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Clock', icon: '⏰', content: '<div id="live-clock" style="font-size: 5em; text-align:center; padding-top: 50px;"></div>' },
-            { name: 'Music', icon: '🎵', content: '<p>Music player UI. Actual playback requires audio files.</p><input type="file" accept="audio/*" />' },
-            { name: 'Photos', icon: '🖼️', content: '<h3>Your Photos</h3><p>Captured photos will appear here.</p><div id="gallery"></div>' },
-            { name: 'Mail', icon: '✉️', content: '<h3>Mail Client</h3><p>This is a conceptual mail client.</p>' },
-            { name: 'Stocks', icon: '📈', content: '<iframe src="https://www.google.com/finance" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'News', icon: '📰', content: '<iframe src="https://news.google.com/" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Books', icon: '📚', content: '<h3>iBooks Clone</h3><p>Your digital library.</p>' },
-            { name: 'Podcasts', icon: '🎙️', content: '<h3>Podcasts</h3><p>Listen to your favorite shows.</p>' },
-            { name: 'Health', icon: '❤️', content: '<h3>Health Dashboard</h3><p>Track your activity.</p>' },
-            { name: 'Home', icon: '🏠', content: '<h3>Home Automation</h3><p>Control your smart devices.</p>' },
-            { name: 'Wallet', icon: '💳', content: '<h3>Wallet</h3><p>Your cards and passes.</p>' },
-            { name: 'Translate', icon: '🗣️', content: '<iframe src="https://translate.google.com/" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Compass', icon: '🧭', content: '<h3>Compass</h3><p>Device orientation needed.</p>' },
-            { name: 'Voice Memos', icon: '🎤', content: '<h3>Voice Memos</h3><button>Record</button>' },
-            { name: 'Contacts', icon: '👤', content: '<h3>Contacts</h3><p>Your address book.</p>' },
-            { name: 'Files', icon: '📁', content: '<h3>Files</h3><p>Browse your documents.</p>' },
-            { name: 'Find My', icon: '📍', content: '<h3>Find My</h3><p>Locate your devices.</p>' },
-            { name: 'Shortcuts', icon: '⚡', content: '<h3>Shortcuts</h3><p>Automate your tasks.</p>' },
-            { name: 'Watch', icon: '⌚', content: '<h3>Watch</h3><p>Manage your Apple Watch.</p>' },
-            { name: 'TV', icon: '📺', content: '<h3>TV App</h3><p>Watch shows and movies.</p>' },
-            { name: 'Game Center', icon: '🎮', content: '<h3>Game Center</h3><p>Play with friends.</p>' },
-            { name: 'Paint', icon: '🎨', content: '<canvas id="paint-canvas" style="width:100%;height:100%;background:white;"></canvas>' },
-            { name: 'Terminal', icon: '🧑‍💻', content: '<div id="terminal" style="background:black;color:lime;height:100%;padding:5px;font-family:monospace;">PwaOS [Version 1.0.0]<br>(c) 2025 PwaOS Corporation. All rights reserved.<br><br>> </div>' },
-            { name: 'Code Editor', icon: ' </>', content: '<textarea style="width:100%;height:100%;font-family:monospace;background:#2d2d2d;color:white;border:none;"></textarea>' },
-            { name: 'Chess', icon: '♟️', content: '<iframe src="https://www.google.com/search?q=chess" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Solitaire', icon: '♠️', content: '<iframe src="https://www.google.com/search?q=solitaire" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Minesweeper', icon: '💣', content: '<iframe src="https://www.google.com/search?q=minesweeper" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Snake', icon: '🐍', content: '<iframe src="https://www.google.com/search?q=snake+game" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Tetris', icon: '🧱', content: '<iframe src="https://www.google.com/search?q=tetris" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Sudoku', icon: '🔢', content: '<iframe src="https://www.google.com/search?q=sudoku" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Tic-Tac-Toe', icon: '⭕', content: '<iframe src="https://www.google.com/search?q=tic-tac-toe" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Pac-Man', icon: '👻', content: '<iframe src="https://www.google.com/search?q=pac-man" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Space Invaders', icon: '👾', content: '<iframe src="https://www.google.com/search?q=space+invaders" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Pong', icon: '🏓', content: '<iframe src="https://www.google.com/search?q=pong+game" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Flappy Bird', icon: '🐦', content: '<iframe src="https://www.google.com/search?q=flappy+bird" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: '2048', icon: '🔢', content: '<iframe src="https://play2048.co/" style="height:100%;width:100%;border:none;"></iframe>' },
-            { name: 'Drums', icon: '🥁', content: '<h3>Drum Kit</h3><p>Tap to play sounds.</p>' },
-            { name: 'Piano', icon: '🎹', content: '<h3>Piano</h3><p>Play some tunes.</p>' },
-            { name: 'Whiteboard', icon: '⬜', content: '<canvas style="width:100%;height:100%;background:white;border:1px solid black;"></canvas>' },
-            { name: 'Unit Converter', icon: '🔄', content: '<h3>Unit Converter</h3><p>Convert units.</p>' },
-            { name: 'Tip Calculator', icon: '💵', content: '<h3>Tip Calculator</h3>' },
-            { name: 'Stopwatch', icon: '⏱️', content: '<h3>Stopwatch</h3>' },
-            { name: 'Timer', icon: '⏲️', content: '<h3>Timer</h3>' },
-            { name: 'Password Gen', icon: '🔑', content: '<h3>Password Generator</h3>' },
-            { name: 'QR Scanner', icon: '📷', content: '<h3>QR Code Scanner</h3><p>Uses camera.</p>' },
-        ];
-        
-        let userApps = JSON.parse(localStorage.getItem('pwaos_user_apps')) || [];
-        let allApps = [...preinstalledApps, ...userApps];
+        let totalPages = 2;
+        let currentApp = null;
+        let calcExpression = '';
+        let calcDisplay = '0';
+        let gameBoard = Array(9).fill('');
+        let currentPlayer = 'X';
+        let gameOver = false;
+        let isPlaying = false;
+        let customApps = [];
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let photos = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            loadNotes();
+            updateClock();
+            setInterval(updateClock, 1000);
+            initializePhotos();
+            
+            // Register service worker for PWA
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4geyBldmVudC53YWl0VW50aWwoc2VsZi5za2lwV2FpdGluZygpKTsgfSk7IHNlbGYuYWRkRXZlbnRMaXN0ZW5lcignYWN0aXZhdGUnLCBldmVudCA9PiB7IGV2ZW50LndhaXRVbnRpbChzZWxmLmNsaWVudHMuY2xhaW0oKSk7IH0pOw==');
+            }
+
+            // Touch event listeners for swiping
+            const homePages = document.getElementById('homePages');
+            let startX = 0;
+            let startY = 0;
+
+            homePages.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            });
+
+            homePages.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+            });
+
+            homePages.addEventListener('touchend', (e) => {
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                const diffX = startX - endX;
+                const diffY = startY - endY;
+
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                    if (diffX > 0 && currentPage < totalPages - 1) {
+                        currentPage++;
+                        updateHomePage();
+                    } else if (diffX < 0 && currentPage > 0) {
+                        currentPage--;
+                        updateHomePage();
+                    }
+                }
+            });
+        });
+
+        // Time and status bar functions
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            document.getElementById('time').textContent = timeString;
+        }
 
         function updateClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            timeEl.textContent = `${hours}:${minutes}`;
-            
-            const liveClock = document.getElementById('live-clock');
-            if(liveClock && document.getElementById('generic-app-window').classList.contains('active')) {
-                liveClock.textContent = `${hours}:${minutes}:${String(now.getSeconds()).padStart(2, '0')}`;
-            }
-        }
-
-        function renderApps() {
-            homeScreen.innerHTML = '';
-            pageIndicator.innerHTML = '';
-            allApps = [...preinstalledApps, ...userApps];
-            const appsPerPage = 16;
-            const pageCount = Math.ceil(allApps.length / appsPerPage);
-
-            for (let i = 0; i < pageCount; i++) {
-                const page = document.createElement('div');
-                page.className = 'page';
-                homeScreen.appendChild(page);
-
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                if (i === currentPage) dot.classList.add('active');
-                pageIndicator.appendChild(dot);
-            }
-
-            allApps.forEach((app, index) => {
-                const pageIndex = Math.floor(index / appsPerPage);
-                const page = homeScreen.children[pageIndex];
-                
-                const appIcon = document.createElement('a');
-                appIcon.href = '#';
-                appIcon.className = 'app-icon';
-                appIcon.dataset.app = app.name;
-                appIcon.innerHTML = `
-                    <div class="icon">${app.icon}</div>
-                    <div class="label">${app.name}</div>
-                `;
-                page.appendChild(appIcon);
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            const dateString = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
             
-            addAppClickListeners();
+            const clockTime = document.getElementById('clockTime');
+            const clockDate = document.getElementById('clockDate');
+            if (clockTime) clockTime.textContent = timeString;
+            if (clockDate) clockDate.textContent = dateString;
         }
 
-        function openApp(appName) {
-            const appData = allApps.find(app => app.name === appName);
-            if (!appData) return;
-
-            const genericWindow = document.getElementById('generic-app-window');
-            const genericTitle = document.getElementById('generic-app-title');
-            const genericContent = document.getElementById('generic-app-content');
-
-            genericTitle.textContent = appData.name;
-            genericContent.innerHTML = appData.content;
-            genericWindow.classList.add('active');
+        // Home screen functions
+        function updateHomePage() {
+            const homePages = document.getElementById('homePages');
+            homePages.style.transform = `translateX(-${currentPage * 100}vw)`;
             
-            if (appName === 'Paint') {
-                setupPaintCanvas();
-            }
-        }
-        
-        function setupPaintCanvas() {
-            const canvas = document.getElementById('paint-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let painting = false;
-
-            function startPosition(e) {
-                painting = true;
-                draw(e);
-            }
-            function endPosition() {
-                painting = false;
-                ctx.beginPath();
-            }
-            function draw(e) {
-                if (!painting) return;
-                ctx.lineWidth = 5;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = 'black';
-
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || e.touches[0].clientX) - rect.left;
-                const y = (e.clientY || e.touches[0].clientY) - rect.top;
-
-                ctx.lineTo(x, y);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-            }
-
-            canvas.addEventListener('mousedown', startPosition);
-            canvas.addEventListener('mouseup', endPosition);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('touchstart', startPosition);
-            canvas.addEventListener('touchend', endPosition);
-            canvas.addEventListener('touchmove', draw);
-        }
-
-        function closeApp() {
-            const windows = document.querySelectorAll('.app-window');
-            windows.forEach(win => win.classList.remove('active'));
-            stopCamera();
-        }
-
-        function addAppClickListeners() {
-            document.querySelectorAll('.app-icon').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const appName = icon.dataset.app;
-                    
-                    const specialApps = ['browser', 'camera', 'app-installer', 'settings'];
-                    if (specialApps.includes(appName)) {
-                        document.getElementById(`${appName}-window`).classList.add('active');
-                        if (appName === 'camera') {
-                            startCamera();
-                        }
-                    } else {
-                        openApp(appName);
-                    }
-                });
-            });
-        }
-        
-        document.querySelectorAll('.close-btn').forEach(btn => {
-            btn.addEventListener('click', closeApp);
-        });
-        
-        // Browser App
-        const goBtn = document.getElementById('go-btn');
-        const urlBar = document.getElementById('url-bar');
-        const browserFrame = document.getElementById('browser-frame');
-        goBtn.addEventListener('click', () => {
-            let url = urlBar.value.trim();
-            if (!url.startsWith('http')) {
-                url = 'https://' + url;
-            }
-            // Using a CORS proxy for cross-origin sites. This is a public proxy.
-            browserFrame.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-        });
-
-        // Camera App
-        const video = document.getElementById('camera-view');
-        let stream;
-        async function startCamera() {
-            try {
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-                video.srcObject = stream;
-            } catch (err) {
-                console.error("Error accessing camera: ", err);
-                alert("Could not access the camera. Please ensure permissions are granted.");
-            }
-        }
-        function stopCamera() {
-             if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-             }
-        }
-        document.getElementById('capture-btn').addEventListener('click', () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const dataUrl = canvas.toDataURL('image/png');
-            const gallery = document.getElementById('gallery');
-            if(gallery) {
-                const img = document.createElement('img');
-                img.src = dataUrl;
-                img.style.width = '100px';
-                img.style.margin = '5px';
-                gallery.appendChild(img);
-            }
-            alert('Photo captured! Check the Photos app.');
-        });
-
-        // App Installer
-        document.getElementById('install-from-url-btn').addEventListener('click', () => {
-            const url = document.getElementById('install-url').value.trim();
-            const name = document.getElementById('install-name-url').value.trim();
-            if (url && name) {
-                const newApp = {
-                    name: name,
-                    icon: name.charAt(0).toUpperCase(),
-                    content: `<iframe src="${url}" style="height:100%;width:100%;border:none;"></iframe>`
-                };
-                userApps.push(newApp);
-                localStorage.setItem('pwaos_user_apps', JSON.stringify(userApps));
-                renderApps();
-                closeApp();
-            }
-        });
-        document.getElementById('install-from-html-btn').addEventListener('click', () => {
-            const html = document.getElementById('install-html').value;
-            const name = document.getElementById('install-name-html').value.trim();
-            if (html && name) {
-                const newApp = {
-                    name: name,
-                    icon: name.charAt(0).toUpperCase(),
-                    content: html
-                };
-                userApps.push(newApp);
-                localStorage.setItem('pwaos_user_apps', JSON.stringify(userApps));
-                renderApps();
-                closeApp();
-            }
-        });
-
-        // Settings
-        document.getElementById('change-wallpaper-btn').addEventListener('click', () => {
-            const url = document.getElementById('wallpaper-url').value.trim();
-            if (url) {
-                osContainer.style.backgroundImage = `url('${url}')`;
-                localStorage.setItem('pwaos_wallpaper', url);
-            }
-        });
-
-        document.getElementById('reset-os-btn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset everything? This will delete all installed apps and settings.')) {
-                localStorage.removeItem('pwaos_user_apps');
-                localStorage.removeItem('pwaos_wallpaper');
-                userApps = [];
-                osContainer.style.backgroundImage = `var(--background-image)`;
-                renderApps();
-                closeApp();
-            }
-        });
-
-        // Home screen swipe
-        function handleSwipe(e) {
-            if (!isDragging) return;
-            const currentX = e.touches[0].clientX;
-            const diffX = startX - currentX;
-            homeScreen.style.transition = 'none';
-            homeScreen.style.transform = `translateX(${-currentPage * window.innerWidth - diffX}px)`;
-        }
-        
-        homeScreen.addEventListener('touchstart', (e) => {
-            // Prevent swipe if inside an app window
-            if (document.querySelector('.app-window.active')) return;
-            startX = e.touches[0].clientX;
-            isDragging = true;
-        });
-
-        homeScreen.addEventListener('touchmove', handleSwipe);
-
-        homeScreen.addEventListener('touchend', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            const endX = e.changedTouches[0].clientX;
-            const diffX = startX - endX;
-            
-            homeScreen.style.transition = 'transform 0.3s ease-in-out';
-
-            if (Math.abs(diffX) > 50) { // Swipe threshold
-                if (diffX > 0 && currentPage < homeScreen.children.length - 1) {
-                    currentPage++;
-                } else if (diffX < 0 && currentPage > 0) {
-                    currentPage--;
-                }
-            }
-            
-            homeScreen.style.transform = `translateX(-${currentPage * 100}%)`;
-            updatePageIndicator();
-        });
-        
-        function updatePageIndicator() {
             const dots = document.querySelectorAll('.dot');
             dots.forEach((dot, index) => {
                 dot.classList.toggle('active', index === currentPage);
             });
         }
 
-        function loadSettings() {
-            const savedWallpaper = localStorage.getItem('pwaos_wallpaper');
-            if (savedWallpaper) {
-                osContainer.style.backgroundImage = `url('${savedWallpaper}')`;
+        // App management functions
+        function openApp(appName) {
+            currentApp = appName;
+            const appWindow = document.getElementById(appName + 'App');
+            if (appWindow) {
+                appWindow.classList.add('active');
+                
+                // Initialize app-specific functionality
+                if (appName === 'camera') {
+                    initCamera();
+                } else if (appName === 'calculator') {
+                    document.getElementById('calcDisplay').textContent = calcDisplay;
+                }
             }
         }
 
-        // Initial setup
-        updateClock();
-        setInterval(updateClock, 1000);
-        loadSettings();
-        renderApps();
-        updatePageIndicator();
-        window.addEventListener('resize', () => {
-            homeScreen.style.transition = 'none';
-            homeScreen.style.transform = `translateX(-${currentPage * 100}%)`;
+        function closeApp() {
+            if (currentApp) {
+                const appWindow = document.getElementById(currentApp + 'App');
+                if (appWindow) {
+                    appWindow.classList.remove('active');
+                }
+                
+                // Cleanup app-specific resources
+                if (currentApp === 'camera') {
+                    stopCamera();
+                }
+                
+                currentApp = null;
+            }
+        }
+
+        // Browser functions
+        function handleUrlInput(event) {
+            if (event.key === 'Enter') {
+                navigateTo();
+            }
+        }
+
+        function navigateTo() {
+            const url = document.getElementById('urlInput').value;
+            const iframe = document.getElementById('browserFrame');
+            
+            if (url) {
+                let finalUrl = url;
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    if (url.includes('.')) {
+                        finalUrl = 'https://' + url;
+                    } else {
+                        finalUrl = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+                    }
+                }
+                iframe.src = finalUrl;
+            }
+        }
+
+        // Camera functions
+        async function initCamera() {
+            try {
+                const video = document.getElementById('cameraVideo');
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('Camera access denied:', err);
+                showNotification('Camera access denied');
+            }
+        }
+
+        function stopCamera() {
+            const video = document.getElementById('cameraVideo');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            // Add photo to photos array
+            const photoData = canvas.toDataURL('image/jpeg');
+            photos.push({
+                id: Date.now(),
+                data: photoData,
+                timestamp: new Date()
+            });
+            
+            updatePhotosGrid();
+            showNotification('Photo captured!');
+        }
+
+        // Calculator functions
+        function calcInput(value) {
+            if (value === '±') {
+                if (calcDisplay !== '0') {
+                    calcDisplay = calcDisplay.startsWith('-') ? calcDisplay.slice(1) : '-' + calcDisplay;
+                }
+            } else if (['+', '-', '*', '/'].includes(value)) {
+                if (calcExpression && !['+', '-', '*', '/'].includes(calcExpression.slice(-1))) {
+                    calcExpression += calcDisplay + value;
+                    calcDisplay = '0';
+                }
+            } else if (value === '.') {
+                if (!calcDisplay.includes('.')) {
+                    calcDisplay += '.';
+                }
+            } else {
+                if (calcDisplay === '0') {
+                    calcDisplay = value;
+                } else {
+                    calcDisplay += value;
+                }
+            }
+            document.getElementById('calcDisplay').textContent = calcDisplay;
+        }
+
+        function calculate() {
+            try {
+                const expression = calcExpression + calcDisplay;
+                const result = eval(expression.replace(/×/g, '*').replace(/÷/g, '/'));
+                calcDisplay = result.toString();
+                calcExpression = '';
+                document.getElementById('calcDisplay').textContent = calcDisplay;
+            } catch (error) {
+                calcDisplay = 'Error';
+                calcExpression = '';
+                document.getElementById('calcDisplay').textContent = calcDisplay;
+            }
+        }
+
+        function clearCalc() {
+            calcDisplay = '0';
+            calcExpression = '';
+            document.getElementById('calcDisplay').textContent = calcDisplay;
+        }
+
+        // Notes functions
+        function saveNotes() {
+            const notes = document.getElementById('notesText').value;
+            localStorage.setItem('altos_notes', notes);
+            showNotification('Notes saved!');
+        }
+
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('altos_notes');
+            if (savedNotes && document.getElementById('notesText')) {
+                document.getElementById('notesText').value = savedNotes;
+            }
+        }
+
+        // Music functions
+        function togglePlay() {
+            const btn = document.getElementById('playBtn');
+            if (isPlaying) {
+                btn.textContent = '▶️';
+                isPlaying = false;
+            } else {
+                btn.textContent = '⏸️';
+                isPlaying = true;
+            }
+        }
+
+        function previousTrack() {
+            document.getElementById('trackTitle').textContent = 'Previous Song';
+            showNotification('Playing previous track');
+        }
+
+        function nextTrack() {
+            document.getElementById('trackTitle').textContent = 'Next Song';
+            showNotification('Playing next track');
+        }
+
+        // Game functions
+        function makeMove(index) {
+            if (gameBoard[index] === '' && !gameOver) {
+                gameBoard[index] = currentPlayer;
+                document.querySelectorAll('.game-cell')[index].textContent = currentPlayer;
+                
+                if (checkWinner()) {
+                    document.getElementById('gameStatus').textContent = `${currentPlayer} Wins!`;
+                    gameOver = true;
+                } else if (gameBoard.every(cell => cell !== '')) {
+                    document.getElementById('gameStatus').textContent = 'Game Draw!';
+                    gameOver = true;
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    document.getElementById('gameStatus').textContent = `${currentPlayer}'s Turn`;
+                }
+            }
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            
+            return winPatterns.some(pattern => 
+                pattern.every(index => gameBoard[index] === currentPlayer)
+            );
+        }
+
+        function resetGame() {
+            gameBoard = Array(9).fill('');
+            currentPlayer = 'X';
+            gameOver = false;
+            document.getElementById('gameStatus').textContent = "X's Turn";
+            document.querySelectorAll('.game-cell').forEach(cell => {
+                cell.textContent = '';
+            });
+        }
+
+        // Photos functions
+        function initializePhotos() {
+            // Add some sample photos
+            for (let i = 0; i < 12; i++) {
+                photos.push({
+                    id: i,
+                    data: null,
+                    timestamp: new Date()
+                });
+            }
+            updatePhotosGrid();
+        }
+
+        function updatePhotosGrid() {
+            const grid = document.getElementById('photosGrid');
+            if (grid) {
+                grid.innerHTML = '';
+                photos.forEach(photo => {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'photo-item';
+                    if (photo.data) {
+                        photoDiv.style.backgroundImage = `url(${photo.data})`;
+                        photoDiv.style.backgroundSize = 'cover';
+                        photoDiv.innerHTML = '';
+                    }
+                    photoDiv.onclick = () => showNotification('Photo viewer coming soon');
+                    grid.appendChild(photoDiv);
+                });
+            }
+        }
+
+        // Settings functions
+        function toggleTheme() {
+            showNotification('Theme toggled');
+        }
+
+        // App Store functions
+        function installApp(appId, appName, appIcon) {
+            const app = {
+                id: appId,
+                name: appName,
+                icon: appIcon,
+                type: 'system'
+            };
+            
+            customApps.push(app);
+            addAppToHomeScreen(app);
+            showNotification(`${appName} installed!`);
+        }
+
+        function showAddAppModal() {
+            document.getElementById('addAppModal').classList.add('active');
+        }
+
+        function hideAddAppModal() {
+            document.getElementById('addAppModal').classList.remove('active');
+            // Clear inputs
+            document.getElementById('appNameInput').value = '';
+            document.getElementById('appIconInput').value = '';
+            document.getElementById('appUrlInput').value = '';
+            document.getElementById('appCodeInput').value = '';
+        }
+
+        function addCustomApp() {
+            const name = document.getElementById('appNameInput').value;
+            const icon = document.getElementById('appIconInput').value || '📱';
+            const url = document.getElementById('appUrlInput').value;
+            const code = document.getElementById('appCodeInput').value;
+            
+            if (!name) {
+                showNotification('Please enter an app name');
+                return;
+            }
+            
+            const app = {
+                id: 'custom_' + Date.now(),
+                name: name,
+                icon: icon,
+                url: url,
+                code: code,
+                type: 'custom'
+            };
+            
+            customApps.push(app);
+            createCustomAppWindow(app);
+            addAppToHomeScreen(app);
+            hideAddAppModal();
+            showNotification(`${name} added!`);
+        }
+
+        function createCustomAppWindow(app) {
+            const appWindow = document.createElement('div');
+            appWindow.className = 'app-window';
+            appWindow.id = app.id + 'App';
+            
+            let content = '';
+            if (app.url) {
+                content = `<div class="browser-frame"><iframe src="${app.url}" style="width:100%;height:100%;border:none;"></iframe></div>`;
+            } else if (app.code) {
+                content = `<div style="height:100%;overflow:auto;">${app.code}</div>`;
+            } else {
+                content = `<div style="text-align:center;padding:40px;"><div style="font-size:64px;margin-bottom:20px;">${app.icon}</div><h3>${app.name}</h3><p>Custom app functionality</p></div>`;
+            }
+            
+            appWindow.innerHTML = `
+                <div class="app-header">
+                    <button class="back-btn" onclick="closeApp()">← Back</button>
+                    <div class="app-title">${app.name}</div>
+                    <div></div>
+                </div>
+                <div class="app-content">${content}</div>
+            `;
+            
+            document.body.appendChild(appWindow);
+        }
+
+        function addAppToHomeScreen(app) {
+            // Find available space on home screen
+            const homePage = document.querySelector('.home-page:last-child');
+            const existingApps = homePage.querySelectorAll('.app-container').length;
+            
+            if (existingApps >= 16) {
+                // Create new page if current is full
+                const newPage = document.createElement('div');
+                newPage.className = 'home-page';
+                document.getElementById('homePages').appendChild(newPage);
+                totalPages++;
+                updatePageDots();
+                homePage = newPage;
+            }
+            
+            const appContainer = document.createElement('div');
+            appContainer.className = 'app-container';
+            appContainer.onclick = () => openApp(app.id);
+            
+            appContainer.innerHTML = `
+                <div class="app-icon" style="background: linear-gradient(45deg, #667eea, #764ba2);">${app.icon}</div>
+                <div class="app-label">${app.name}</div>
+            `;
+            
+            homePage.appendChild(appContainer);
+        }
+
+        function updatePageDots() {
+            const dotsContainer = document.getElementById('pageDots');
+            dotsContainer.innerHTML = '';
+            
+            for (let i = 0; i < totalPages; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i === currentPage) dot.classList.add('active');
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        // Utility functions
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                backdrop-filter: blur(10px);
+                z-index: 1002;
+                font-size: 14px;
+                animation: slideDown 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // Add slide down animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideDown {
+                    from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+                    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideDown 0.3s ease reverse';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Handle dynamic app opening for custom apps
+        window.openApp = function(appName) {
+            currentApp = appName;
+            const appWindow = document.getElementById(appName + 'App');
+            if (appWindow) {
+                appWindow.classList.add('active');
+                
+                // Initialize app-specific functionality
+                if (appName === 'camera') {
+                    initCamera();
+                } else if (appName === 'calculator') {
+                    document.getElementById('calcDisplay').textContent = calcDisplay;
+                }
+            }
+        };
+
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
         });
-    });
 
-    // PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Service Worker registered', reg))
-        .catch(err => console.log('Service Worker not registered', err));
-    }
-</script>
-<!-- The Service Worker should be in a separate file `sw.js` for PWA functionality.
-     For this single-file requirement, we'll embed it. This is not standard but works for a demo. -->
-<script id="sw">
-    const cacheName = 'pwaos-v1';
-    const assetsToCache = [
-        '/', // This will cache the main HTML file
-        // Since everything is inline, we only need to cache the root.
-    ];
+        // Prevent pull-to-refresh
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        });
 
-    self.addEventListener('install', event => {
-        event.waitUntil(
-            caches.open(cacheName).then(cache => {
-                return cache.addAll(assetsToCache);
-            })
-        );
-    });
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        });
 
-    self.addEventListener('fetch', event => {
-        event.respondWith(
-            caches.match(event.request).then(response => {
-                return response || fetch(event.request);
-            })
-        );
-    });
-</script>
-<script>
-    // Create a blob from the service worker script content
-    const swScript = document.getElementById('sw').textContent;
-    const swBlob = new Blob([swScript], {type: 'application/javascript'});
-    const swUrl = URL.createObjectURL(swBlob);
+        // Handle app installation prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install notification
+            showNotification('Tap to install AltOS as an app!');
+            
+            // Add install button functionality
+            setTimeout(() => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            showNotification('AltOS installed successfully!');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            }, 5000);
+        });
 
-    // Register the service worker from the blob URL
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(swUrl)
-        .then(reg => console.log('Service Worker registered from Blob', reg))
-        .catch(err => console.log('Service Worker not registered from Blob', err));
-    }
-</script>
+        // PWA installation detection
+        window.addEventListener('appinstalled', () => {
+            showNotification('Welcome to AltOS!');
+        });
 
+        // Handle online/offline status
+        window.addEventListener('online', () => {
+            showNotification('Connection restored');
+        });
+
+        window.addEventListener('offline', () => {
+            showNotification('Working offline');
+        });
+
+        // Battery API (if supported)
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then((battery) => {
+                function updateBattery() {
+                    const level = Math.round(battery.level * 100);
+                    document.getElementById('battery').textContent = `🔋 ${level}%`;
+                }
+                
+                battery.addEventListener('levelchange', updateBattery);
+                updateBattery();
+            });
+        }
+
+        // Wake lock API to prevent screen from sleeping during app usage
+        let wakeLock = null;
+        
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake lock failed:', err);
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                requestWakeLock();
+            }
+        });
+
+        // Initialize wake lock
+        requestWakeLock();
+
+        // Handle hardware back button (Android)
+        window.addEventListener('popstate', (e) => {
+            if (currentApp) {
+                closeApp();
+                history.pushState(null, null, location.href);
+            }
+        });
+
+        // Push initial state for back button handling
+        history.pushState(null, null, location.href);
+
+        // Haptic feedback (if supported)
+        function hapticFeedback() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(10);
+            }
+        }
+
+        // Add haptic feedback to app icons
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.app-icon')) {
+                hapticFeedback();
+            }
+        });
+
+        // Keyboard handling for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentApp) {
+                closeApp();
+            }
+        });
+
+        // Auto-save notes
+        setInterval(() => {
+            const notesText = document.getElementById('notesText');
+            if (notesText && document.activeElement === notesText) {
+                saveNotes();
+            }
+        }, 30000); // Auto-save every 30 seconds
+
+        // Dynamic app loading completion notification
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                showNotification('AltOS ready! Swipe to explore apps.');
+            }, 1000);
+        });
+
+        // Error handling for iframe apps
+        window.addEventListener('error', (e) => {
+            if (e.target.tagName === 'IFRAME') {
+                showNotification('App failed to load');
+            }
+        });
+
+        // Handle app crashes gracefully
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showNotification('An error occurred. Please try again.');
+        });
+
+        // Memory management for large apps
+        const appCache = new Map();
+        const MAX_CACHED_APPS = 5;
+
+        function cacheApp(appId, appData) {
+            if (appCache.size >= MAX_CACHED_APPS) {
+                const firstKey = appCache.keys().next().value;
+                appCache.delete(firstKey);
+            }
+            appCache.set(appId, appData);
+        }
+
+        // Performance monitoring
+        if ('performance' in window) {
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    const perf = performance.getEntriesByType('navigation')[0];
+                    console.log('AltOS loaded in:', perf.loadEventEnd - perf.loadEventStart, 'ms');
+                }, 0);
+            });
+        }
+
+        // Debug mode (enable with triple tap on status bar)
+        let tapCount = 0;
+        document.querySelector('.status-bar').addEventListener('click', () => {
+            tapCount++;
+            setTimeout(() => { tapCount = 0; }, 1000);
+            
+            if (tapCount === 3) {
+                showNotification('Debug mode: Check console for logs');
+                console.log('AltOS Debug Info:', {
+                    customApps: customApps,
+                    currentApp: currentApp,
+                    photos: photos.length,
+                    notes: localStorage.getItem('altos_notes')?.length || 0
+                });
+            }
+        });
+    </script>
 </body>
 </html>
